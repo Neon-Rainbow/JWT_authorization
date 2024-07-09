@@ -16,6 +16,14 @@ type MySQL struct {
 	Database string `json:"database"`
 }
 
+type Redis struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Database int    `json:"database"`
+}
+
 type JWT struct {
 	Secret string `json:"secret"`
 }
@@ -24,6 +32,7 @@ type Config struct {
 	Address        string `json:"address"`
 	Port           int    `json:"port"`
 	MySQL          MySQL  `json:"MySQL"`
+	Redis          Redis  `json:"Redis"`
 	JWT            JWT    `json:"JWT"`
 	PasswordSecret string `json:"passwordSecret"`
 }

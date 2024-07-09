@@ -2,11 +2,13 @@ package model
 
 import "gorm.io/gorm"
 
-// User struct
 type User struct {
 	gorm.Model
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username  string `gorm:"type:varchar(255);unique;not null"`
+	Password  string `gorm:"type:varchar(255)"`
+	Telephone string `gorm:"type:varchar(255);unique;not null"`
+	IsFrozen  bool
+	IsAdmin   bool
 }
 
 // UserLoginRequest struct

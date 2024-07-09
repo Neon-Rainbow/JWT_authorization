@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	accessTokenExpireDuration  = time.Minute * 5    // Access token expiration time
-	refreshTokenExpireDuration = time.Hour * 24 * 7 // Refresh token expiration time
+	accessTokenExpireDuration  = time.Minute * 2     // Access token expiration time
+	refreshTokenExpireDuration = time.Hour * 24 * 15 // Refresh token expiration time
 )
 
 // MyClaims is a custom JWT claims structure that includes standard claims along with user-specific information
@@ -18,6 +18,7 @@ type MyClaims struct {
 	Username  string `json:"username"`
 	UserID    uint   `json:"user_id"`
 	TokenType string `json:"token_type"`
+	IsAdmin   bool   `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -28,8 +29,8 @@ type MyClaims struct {
 // @param userId uint The user ID
 // @return accessToken string The access token
 // @return refreshToken string The refresh token
-// @return err error Error information
-func GenerateToken(username string, userId uint) (accessToken string, refreshToken string, err error) {
+// @return err error information
+func GenerateToken(username string, userId uint, isAdmin bool) (accessToken string, refreshToken string, err error) {
 	// Retrieve the secret key from the configuration
 	var jwtSecret = config.GetConfig().JWT.Secret
 	var mySecret = []byte(jwtSecret)
@@ -49,6 +50,7 @@ func GenerateToken(username string, userId uint) (accessToken string, refreshTok
 			Username:  username,
 			UserID:    userId,
 			TokenType: "access_token",
+			IsAdmin:   isAdmin,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenExpireDuration)), // Expiration time
 				IssuedAt:  jwt.NewNumericDate(time.Now()),                                // Issued time
