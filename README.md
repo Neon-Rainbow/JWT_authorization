@@ -1,67 +1,69 @@
-# JWT_authorization
+# JWT Authorization
 
-[English version](./README.md)
+[简体中文](./README_zh.md)
 
-一个使用了JWT + MySQL + Redis技术栈的用户认证,权限控制的Demo项目
+A demo project for user authentication and authorization control using JWT, MySQL, and Redis technology stack.
 
-## 项目结构
+## Project Structure
 
 ```
 .
 ├── README.md
 ├── README_zh.md
 ├── code
-│   └── code.go
+│   └── code.go
 ├── config
-│   └── config.go
+│   └── config.go
 ├── config.json
 ├── go.mod
 ├── go.sum
 ├── internal
-│   ├── controller
-│   │   ├── contextKey.go
-│   │   ├── deleteUser.go
-│   │   ├── frozen.go
-│   │   ├── getAdminInfo.go
-│   │   ├── getUserID.go
-│   │   ├── getUserInfo.go
-│   │   ├── login.go
-│   │   ├── refreshToken.go
-│   │   ├── register.go
-│   │   └── response.go
-│   ├── dao
-│   │   ├── token.go
-│   │   └── user.go
-│   └── service
-│       ├── EncryptPassword.go
-│       ├── deleteUser.go
-│       ├── frozen.go
-│       ├── login.go
-│       ├── refreshToken.go
-│       └── register.go
+│   ├── controller
+│   │   ├── contextKey.go
+│   │   ├── deleteUser.go
+│   │   ├── frozen.go
+│   │   ├── getAdminInfo.go
+│   │   ├── getUserID.go
+│   │   ├── getUserInfo.go
+│   │   ├── login.go
+│   │   ├── refreshToken.go
+│   │   ├── register.go
+│   │   └── response.go
+│   ├── dao
+│   │   ├── token.go
+│   │   └── user.go
+│   └── service
+│       ├── EncryptPassword.go
+│       ├── deleteUser.go
+│       ├── frozen.go
+│       ├── login.go
+│       ├── refreshToken.go
+│       └── register.go
 ├── main.go
 ├── middleware
-│   ├── adminMiddleware.go
-│   └── jwtMiddleware.go
+│   ├── adminMiddleware.go
+│   └── jwtMiddleware.go
 ├── model
-│   ├── apiError.go
-│   ├── token.go
-│   └── user.go
+│   ├── apiError.go
+│   ├── token.go
+│   └── user.go
 ├── route
-│   └── route.go
+│   └── route.go
 └── util
     ├── MySQL
-    │   └── MySQL.go
+    │   └── MySQL.go
     ├── Redis
-    │   └── Redis.go
+    │   └── Redis.go
     ├── initSQL.go
     └── jwt
         └── jwt.go
 ```
 
-## 项目配置
-需要编写config.json并且放在项目根目录下
-config.json格式:
+## Project Configuration
+
+You need to create a `config.json` file and place it in the root directory of the project.
+The format of `config.json` is:
+
 ```json
 {
   "address":"127.0.0.1",
@@ -87,27 +89,22 @@ config.json格式:
 }
 ```
 
-## 项目启动
-终端执行下列指令:
+## Project Startup
+
+Run the following command in the terminal:
+
 ```shell
 go run main.go
 ```
-## 项目接口:
+
+## Project APIs:
 
 ### POST /api/auth/login
-注册接口
-请求参数:
-```json
-{
-  "username": "admin",
-  "password": "admin"
-}
-```
 
+Login endpoint
 
-### POST /api/auth/register
-登录接口
-请求参数:
+Request parameters:
+
 ```json
 {
   "username": "admin",
@@ -116,8 +113,11 @@ go run main.go
 ```
 
 ### POST /api/auth/register
-注册接口
-请求参数:
+
+Registration endpoint
+
+Request parameters:
+
 ```json
 {
   "username": "admin",
@@ -126,45 +126,51 @@ go run main.go
 ```
 
 ### POST /api/auth/refresh
-刷新token接口
 
-请求参数:
-+ Query Params: ?refresh_token={refresh_token}
+Refresh token endpoint
+
+Request parameters:
++ Query Params: `?refresh_token={refresh_token}`
 
 ### POST /api/user/frozen
-冻结用户接口
 
-请求参数:
-+ Header: Authorization: Bearer {access_token}
+Freeze user endpoint
+
+Request parameters:
++ Header: `Authorization: Bearer {access_token}`
 
 ### POST /api/user/delete_account
-删除用户接口
 
-请求参数:
-+ Header: Authorization: Bearer {access_token}
+Delete user endpoint
+
+Request parameters:
++ Header: `Authorization: Bearer {access_token}`
 
 ### POST /api/admin/frozen
-冻结用户接口
 
-请求参数:
-+ Query Params: ?user_id={user_id}
-+ Header: Authorization: Bearer {access_token}
+Freeze user endpoint (admin)
+
+Request parameters:
++ Query Params: `?user_id={user_id}`
++ Header: `Authorization: Bearer {access_token}`
 
 ### POST /api/admin/thaw
-解冻用户接口
 
-请求参数:
-+ Query Params: ?user_id={user_id}
-+ Header: Authorization: Bearer {access_token}
+Unfreeze user endpoint (admin)
+
+Request parameters:
++ Query Params: `?user_id={user_id}`
++ Header: `Authorization: Bearer {access_token}`
 
 ### POST /api/admin/delete_account
-删除用户接口
 
-请求参数:
-+ Query Params: ?user_id={user_id}
-+ Header: Authorization: Bearer {access_token}
+Delete user endpoint (admin)
 
-## 状态码
+Request parameters:
++ Query Params: `?user_id={user_id}`
++ Header: `Authorization: Bearer {access_token}`
+
+## Status Code
 
 | Error Code                | Description                        |
 |---------------------------|------------------------------------|
