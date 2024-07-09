@@ -17,7 +17,7 @@ func GetUserID(c *gin.Context) string {
 		}
 		userID = fmt.Sprintf("%v", _any_type_userID) // _any_type_userID is interface{} type, so we need to convert it to string type to get the value of
 	} else {
-		userID = c.Query("userID")
+		userID = c.Query("user_id")
 		if userID == "" {
 			ResponseErrorWithCode(c, code.FrozenUserIDRequired)
 			return ""
