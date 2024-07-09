@@ -125,7 +125,7 @@ Request parameters:
 }
 ```
 
-### POST /api/auth/refresh
+### GET /api/auth/refresh
 
 Refresh token endpoint
 

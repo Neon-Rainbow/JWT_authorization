@@ -125,7 +125,7 @@ go run main.go
 }
 ```
 
-### POST /api/auth/refresh
+### GET /api/auth/refresh
 刷新token接口
 
 请求参数:
