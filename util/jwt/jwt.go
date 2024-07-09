@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	accessTokenExpireDuration  = time.Minute * 2     // Access token expiration time
+	accessTokenExpireDuration  = time.Minute * 20    // Access token expiration time
 	refreshTokenExpireDuration = time.Hour * 24 * 15 // Refresh token expiration time
 )
 

@@ -29,6 +29,8 @@ type UserLoginResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	UserID       uint   `json:"user_id"`
 	Username     string `json:"username"`
+	IsAdmin      bool   `json:"is_admin"`
+	IsFrozen     bool   `json:"is_frozen"`
 }
 
 type UserRegisterResponse struct {

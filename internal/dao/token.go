@@ -7,7 +7,6 @@ import (
 )
 
 var ctx = context.Background()
-var rdb = Redis.GetRedis()
 
 // SetTokenToRedis is a function to set token to redis
 func SetTokenToRedis(userID string, refreshToken string) error {
@@ -21,6 +20,7 @@ func SetTokenToRedis(userID string, refreshToken string) error {
 
 // GetTokenFromRedis is a function to get token from redis
 func GetTokenFromRedis(userID string) (refreshToken string, err error) {
+	rdb := Redis.GetRedis()
 	refreshToken, err = rdb.Get(ctx, userID).Result()
 	if err != nil {
 		return "", err
@@ -30,6 +30,7 @@ func GetTokenFromRedis(userID string) (refreshToken string, err error) {
 
 // DeleteTokenFromRedis is a function to delete token from redis
 func DeleteTokenFromRedis(userID string) error {
+	rdb := Redis.GetRedis()
 	err := rdb.Del(ctx, userID).Err()
 	if err != nil {
 		return err

@@ -23,6 +23,14 @@ const (
 	RequestUnauthorized
 
 	RefreshTokenError
+
+	FrozenUserIDRequired
+	FrozenUserError
+
+	ThawUserIDRequired
+	ThawUserError
+
+	DeleteUserError
 )
 
 var codeMsgMap = map[ResponseCode]string{
@@ -44,6 +52,14 @@ var codeMsgMap = map[ResponseCode]string{
 	RequestUnauthorized: "request unauthorized",
 
 	RefreshTokenError: "refresh token error",
+
+	FrozenUserIDRequired: "frozen user id required",
+	FrozenUserError:      "frozen user error",
+
+	ThawUserIDRequired: "thaw user id required",
+	ThawUserError:      "thaw user error",
+
+	DeleteUserError: "delete user error",
 }
 
 func (code ResponseCode) Message() string {

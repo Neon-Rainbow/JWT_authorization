@@ -18,21 +18,30 @@ func NewRouter() *gin.Engine {
 
 	rootRouter := router.Group("/api")
 
-	authRouter := rootRouter.Group("/auth")
+	authGroup := rootRouter.Group("/auth")
 	{
-		authRouter.POST("/login", controller.LoginHandler)
-		authRouter.POST("/register", controller.RegisterHandle)
-		authRouter.POST("/refresh", controller.RefreshTokenHandle)
+		authGroup.POST("/login", controller.LoginHandler)
+		authGroup.POST("/admin_login", controller.AdminLoginHandle)
+
+		authGroup.POST("/register", controller.RegisterHandle)
+		authGroup.GET("/refresh", controller.RefreshTokenHandle)
 	}
 
-	userRouter := rootRouter.Group("/user")
+	userGroup := rootRouter.Group("/user")
+	userGroup.Use(middleware.JWTMiddleware())
 	{
-		userRouter.GET("/info", middleware.JWTMiddleware(), controller.GetUserInfo)
+		userGroup.GET("/info", controller.GetUserInfo)
+		userGroup.POST("/frozen", controller.FreezeUserHandle)
+		userGroup.POST("/delete_account", controller.DeleteUserHandle)
 	}
 
 	adminGroup := rootRouter.Group("/admin")
+	adminGroup.Use(middleware.JWTMiddleware(), middleware.AdminMiddleware())
 	{
-		adminGroup.GET("/info", middleware.JWTMiddleware(), middleware.AdminMiddleware(), controller.GetAdminInfo)
+		adminGroup.GET("/info", controller.GetAdminInfo)
+		adminGroup.POST("/frozen", controller.FreezeUserHandle)
+		adminGroup.POST("/thaw", controller.ThawUserHandle)
+		adminGroup.POST("/delete_account", controller.DeleteUserHandle)
 	}
 
 	return router

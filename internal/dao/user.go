@@ -108,7 +108,7 @@ func CreateUser(username string, password string, telephone string) (*model.User
 		IsFrozen:  false,
 		IsAdmin:   false,
 	}
-	result := db.Create(user)
+	result := db.Model(&model.User{}).Save(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -117,12 +117,41 @@ func CreateUser(username string, password string, telephone string) (*model.User
 
 }
 
-func CheckUserFrozen(username string) (bool, error) {
+func CheckUserFrozen(userID string) (bool, error) {
 	db := MySQL.GetMySQL()
 	var user *model.User
-	result := db.Where("username = ?", username).First(&user)
+	result := db.Where("id = ?", userID).First(&user)
 	if result.Error != nil {
 		return false, result.Error
 	}
 	return user.IsFrozen, nil
+}
+
+// FreezeUser freezes a user in MySQL
+func FreezeUser(userID string) error {
+	db := MySQL.GetMySQL()
+	result := db.Model(&model.User{}).Where("id = ?", userID).Update("is_frozen", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+// ThawUser thaws a user in MySQL
+func ThawUser(userID string) error {
+	db := MySQL.GetMySQL()
+	result := db.Model(&model.User{}).Where("id = ?", userID).Update("is_frozen", false)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func DeleteUser(userID string) error {
+	db := MySQL.GetMySQL()
+	result := db.Where("id = ?", userID).Delete(&model.User{})
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

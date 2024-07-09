@@ -52,9 +52,15 @@ func RefreshTokenHandle(c *gin.Context) {
 		}
 		if result.Response != nil {
 			ResponseSuccess(c, result.Response)
+			return
 		}
 	case <-ctx.Done():
 		ResponseErrorWithCode(c, code.RequestTimeout)
+		return
+	default:
+
 	}
+	ResponseErrorWithCode(c, code.ServerBusy)
+	return
 
 }
