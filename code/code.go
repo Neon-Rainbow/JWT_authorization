@@ -7,6 +7,7 @@ const (
 
 	RequestTimeout
 	ServerBusy
+
 	LoginParamsError
 	LoginGetUserInformationError
 	LoginPasswordError
@@ -30,19 +31,26 @@ const (
 	ThawUserIDRequired
 	ThawUserError
 
-	DeleteUserError
+	DeleteUserTokenError
+
+	PermissionGetError
+	PermissionDenied
+	PermissionParamsError
+	PermissionChangeError
 )
 
 var codeMsgMap = map[ResponseCode]string{
-	Success:                      "success",
-	RequestTimeout:               "request timeout",
-	ServerBusy:                   "server busy",
+	Success:        "success",
+	RequestTimeout: "request timeout",
+	ServerBusy:     "server busy",
+
 	LoginParamsError:             "login params error",
 	LoginGetUserInformationError: "Get User Information error",
 	LoginPasswordError:           "login password error",
 	LoginGenerateTokenError:      "login generate token error",
 	LoginUserIsFrozen:            "login user is Frozen",
 	LoginUserNotFound:            "login user not found",
+
 	RegisterParamsError:          "Register params error",
 	RegisterCheckUserExistsError: "Register check user exists error",
 	RegisterUsernameExists:       "Register username exists",
@@ -59,9 +67,25 @@ var codeMsgMap = map[ResponseCode]string{
 	ThawUserIDRequired: "thaw user id required",
 	ThawUserError:      "thaw user error",
 
-	DeleteUserError: "delete user error",
+	DeleteUserTokenError: "delete user error",
+
+	PermissionGetError:    "permission get error",
+	PermissionDenied:      "permission denied",
+	PermissionParamsError: "permission params error",
+	PermissionChangeError: "permission add error",
 }
 
 func (code ResponseCode) Message() string {
 	return codeMsgMap[code]
 }
+
+const (
+	Permission1 = 1 << iota
+	Permission2
+	Permission3
+	Permission4
+	Permission5
+	Permission6
+	Permission7
+	AllPermission = Permission1 | Permission2 | Permission3 | Permission4 | Permission5 | Permission6 | Permission7
+)

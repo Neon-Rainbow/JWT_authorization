@@ -16,7 +16,7 @@ func NewRouter() *gin.Engine {
 		})
 	})
 
-	rootRouter := router.Group("/api")
+	rootRouter := router.Group("/api/v1")
 
 	authGroup := rootRouter.Group("/auth")
 	{
@@ -24,24 +24,35 @@ func NewRouter() *gin.Engine {
 		authGroup.POST("/admin_login", controller.AdminLoginHandle)
 
 		authGroup.POST("/register", controller.RegisterHandle)
+
 		authGroup.GET("/refresh", controller.RefreshTokenHandle)
+
 	}
 
 	userGroup := rootRouter.Group("/user")
 	userGroup.Use(middleware.JWTMiddleware())
 	{
-		userGroup.GET("/info", controller.GetUserInfo)
-		userGroup.POST("/frozen", controller.FreezeUserHandle)
+		userGroup.POST("/logout", middleware.JWTMiddleware(), controller.LogoutHandle)
+
+		userGroup.POST("/frozen_account", controller.FreezeUserHandle)
 		userGroup.POST("/delete_account", controller.DeleteUserHandle)
+
+		userGroup.GET("/check_permission", controller.CheckUserPermissionsHandle)
+		userGroup.GET("/get_user_permission", controller.GetUserPermissionHandle)
 	}
 
 	adminGroup := rootRouter.Group("/admin")
 	adminGroup.Use(middleware.JWTMiddleware(), middleware.AdminMiddleware())
 	{
-		adminGroup.GET("/info", controller.GetAdminInfo)
-		adminGroup.POST("/frozen", controller.FreezeUserHandle)
-		adminGroup.POST("/thaw", controller.ThawUserHandle)
+		adminGroup.POST("/frozen_account", controller.FreezeUserHandle)
+		adminGroup.POST("/thaw_account", controller.ThawUserHandle)
 		adminGroup.POST("/delete_account", controller.DeleteUserHandle)
+
+		adminGroup.GET("/check_permission", controller.CheckUserPermissionsHandle)
+		adminGroup.GET("/get_user_permission", controller.GetUserPermissionHandle)
+
+		adminGroup.POST("/add_permission", controller.AddUserPermissionHandle)
+		adminGroup.POST("/delete_permission", controller.DeleteUserPermissionHandle)
 	}
 
 	return router

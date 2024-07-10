@@ -4,11 +4,12 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Username  string `gorm:"type:varchar(255);unique;not null"`
-	Password  string `gorm:"type:varchar(255)"`
-	Telephone string `gorm:"type:varchar(255);unique;not null"`
-	IsFrozen  bool
-	IsAdmin   bool
+	Username   string `gorm:"type:varchar(255);unique;not null"`
+	Password   string `gorm:"type:varchar(255)"`
+	Telephone  string `gorm:"type:varchar(255);unique;not null"`
+	IsFrozen   bool   `gorm:"default:false"`
+	IsAdmin    bool   `gorm:"default:false"`
+	Permission int    `gorm:"default:0"`
 }
 
 // UserLoginRequest struct

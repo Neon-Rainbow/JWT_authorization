@@ -12,14 +12,14 @@ func GetUserID(c *gin.Context) string {
 	if !isAdmin.(bool) {
 		_any_type_userID, exist := c.Get("userID")
 		if !exist {
-			ResponseErrorWithCode(c, code.FrozenUserIDRequired)
+			ResponseErrorWithCode(c, code.ServerBusy)
 			return ""
 		}
 		userID = fmt.Sprintf("%v", _any_type_userID) // _any_type_userID is interface{} type, so we need to convert it to string type to get the value of
 	} else {
 		userID = c.Query("user_id")
 		if userID == "" {
-			ResponseErrorWithCode(c, code.FrozenUserIDRequired)
+			ResponseErrorWithCode(c, code.ServerBusy)
 			return ""
 		}
 	}

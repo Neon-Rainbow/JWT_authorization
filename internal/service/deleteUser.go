@@ -20,7 +20,7 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 		err := dao.DeleteUser(userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.DeleteUserError,
+				Code:    code.DeleteUserTokenError,
 				Message: "delete user error",
 				Error:   err,
 			}
@@ -33,7 +33,7 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 		err := dao.DeleteTokenFromRedis(userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.DeleteUserError,
+				Code:    code.DeleteUserTokenError,
 				Message: "delete token from redis error",
 				Error:   err,
 			}

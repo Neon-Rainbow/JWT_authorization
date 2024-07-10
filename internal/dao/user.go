@@ -155,3 +155,22 @@ func DeleteUser(userID string) error {
 	}
 	return nil
 }
+
+func GetUserPermissions(userID string) (int, error) {
+	db := MySQL.GetMySQL()
+	var user *model.User
+	result := db.Where("id = ?", userID).First(&user)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return user.Permission, nil
+}
+
+func ChangeUserPermissions(userID string, newPermissions int) error {
+	db := MySQL.GetMySQL()
+	result := db.Model(&model.User{}).Where("id = ?", userID).Update("permission", newPermissions)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
