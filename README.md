@@ -99,76 +99,7 @@ go run main.go
 
 ## Project APIs:
 
-### POST /api/auth/login
-
-Login endpoint
-
-Request parameters:
-
-```json
-{
-  "username": "admin",
-  "password": "admin"
-}
-```
-
-### POST /api/auth/register
-
-Registration endpoint
-
-Request parameters:
-
-```json
-{
-  "username": "admin",
-  "password": "admin"
-}
-```
-
-### GET /api/auth/refresh
-
-Refresh token endpoint
-
-Request parameters:
-+ Query Params: `?refresh_token={refresh_token}`
-
-### POST /api/user/frozen
-
-Freeze user endpoint
-
-Request parameters:
-+ Header: `Authorization: Bearer {access_token}`
-
-### POST /api/user/delete_account
-
-Delete user endpoint
-
-Request parameters:
-+ Header: `Authorization: Bearer {access_token}`
-
-### POST /api/admin/frozen
-
-Freeze user endpoint (admin)
-
-Request parameters:
-+ Query Params: `?user_id={user_id}`
-+ Header: `Authorization: Bearer {access_token}`
-
-### POST /api/admin/thaw
-
-Unfreeze user endpoint (admin)
-
-Request parameters:
-+ Query Params: `?user_id={user_id}`
-+ Header: `Authorization: Bearer {access_token}`
-
-### POST /api/admin/delete_account
-
-Delete user endpoint (admin)
-
-Request parameters:
-+ Query Params: `?user_id={user_id}`
-+ Header: `Authorization: Bearer {access_token}`
+[Postman json](./docs/JWT.postman_collection.json)
 
 ## Status Code
 
