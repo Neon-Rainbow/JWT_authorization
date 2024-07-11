@@ -6,6 +6,7 @@ import (
 	"JWT_authorization/model"
 	"context"
 	"github.com/gin-gonic/gin"
+	"sync"
 	"time"
 )
 
@@ -16,24 +17,45 @@ func FreezeUserHandle(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	errorChannel := make(chan *model.ApiError, 1)
-	resultChannel := make(chan bool, 1)
+	errorChannel := make(chan *model.ApiError)
+	doneChannel := make(chan bool)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
 
 	go func() {
+		defer wg.Done()
 		apiError := service.ProcessFreezeUser(userID)
 		if apiError != nil {
+			//errorChannel is a channel without buffer, so it will block until the error is read
 			errorChannel <- apiError
 			return
 		}
-		resultChannel <- true
 		return
+	}()
+
+	go func() {
+		defer wg.Done()
+		apiError := service.ChangeUserPermissions(userID, 0) // 0 means no permission
+		if apiError != nil {
+			//errorChannel is a channel without buffer, so it will block until the error is read
+			errorChannel <- apiError
+			return
+		}
+		return
+	}()
+
+	go func() {
+		// Wait for the two goroutines to finish
+		wg.Wait()
+		doneChannel <- true
 	}()
 
 	select {
 	case apiError := <-errorChannel:
 		ResponseErrorWithApiError(c, apiError)
 		return
-	case <-resultChannel:
+	case <-doneChannel:
 		ResponseSuccess(c, nil)
 		return
 	case <-ctx.Done():

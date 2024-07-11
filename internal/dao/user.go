@@ -166,6 +166,9 @@ func GetUserPermissions(userID string) (int, error) {
 	return user.Permission, nil
 }
 
+// ChangeUserPermissions changes the permissions of a user in MySQL
+// @param userID: the ID of the user
+// @param newPermissions: the new permissions of the user, represented as an integer, with each bit representing a permission
 func ChangeUserPermissions(userID string, newPermissions int) error {
 	db := MySQL.GetMySQL()
 	result := db.Model(&model.User{}).Where("id = ?", userID).Update("permission", newPermissions)
