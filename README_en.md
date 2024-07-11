@@ -1,16 +1,16 @@
-# JWT_authorization
+# JWT Authorization
 
-[English version](./README_en)
+[简体中文](./README)
 
-一个使用了JWT + MySQL + Redis + gRPC 技术栈的用户认证,权限控制的Demo项目,项目提供了HTTP接口以及gRPC接口
+A demo project for user authentication and authorization control using JWT, MySQL, Redis and gRPC technology stack.
+The project provides HTTP API and gRPC API
 
-## 项目模型
+## Program Model
+The project adopts a general scaffold: the CLD model, where the controller layer, service layer, and DAO layer all use interfaces.
 
-项目采用了通用脚手架:CLD模型,其中controller层,service层以及dao层均使用了接口
+The project uses **dependency injection**, which enables a clear, modular, and maintainable code structure. Each layer has its own interface, and dependency injection decouples the layers from each other.
 
-项目使用了**依赖注入**的方式,这种方式可以实现一个清晰、模块化且易于维护的代码结构，每一层都有自己的接口，并通过依赖注入实现了层之间的解耦。
-
-层之间的注入关系:
+The injection relationship between layers is as follows:
 
 ```mermaid
 graph TD
@@ -51,14 +51,14 @@ graph TD
     C1Impl --> D1
 ```
 
-+ main.go：项目的入口文件，负责初始化和依赖注入。
-+ controller层包含两个接口JwtAuthorizationServiceServer和UserController，以及它们的实现JwtAuthorizationServiceServerImpl和UserControllerImpl。
-+ service层包含接口UserService及其实现UserServiceImpl。
-+ dao层包含接口UserDAO及其实现UserDAOImpl。
-+ JwtAuthorizationServiceServerImpl和UserControllerImpl依赖于UserService。
-+ UserServiceImpl依赖于UserDAO。
++ main.go: The project's entry file, responsible for initialization and dependency injection.
++ The controller layer contains two interfaces, JwtAuthorizationServiceServer and UserController, and their implementations, JwtAuthorizationServiceServerImpl and UserControllerImpl.
++ The service layer contains the UserService interface and its implementation, UserServiceImpl.
++ The DAO layer contains the UserDAO interface and its implementation, UserDAOImpl.
++ JwtAuthorizationServiceServerImpl and UserControllerImpl depend on UserService.
++ UserServiceImpl depends on UserDAO.
 
-## 项目结构
+## Project Structure
 
 ```
 .
@@ -128,12 +128,13 @@ graph TD
         └── jwt.go
 
 18 directories, 47 files
-
 ```
 
-## 项目配置
-需要编写config.json并且放在项目根目录下
-config.json格式:
+## Project Configuration
+
+You need to create a `config.json` file and place it in the root directory of the project.
+The format of `config.json` is:
+
 ```json
 {
   "address":"127.0.0.1",
@@ -163,18 +164,21 @@ config.json格式:
 }
 ```
 
-## 项目启动
-终端执行下列指令:
+## Project Startup
+
+Run the following command in the terminal:
+
 ```shell
 go run main.go
 ```
-## 项目接口:
 
-[http Postman json](./docs/JWT.postman_collection.json)
+## Project APIs:
+
+[Postman json](./docs/JWT.postman_collection.json)
 
 [gRPC proto](./proto/jwt_authorization.proto)
 
-## 状态码
+## Status Code
 
 | Error Code                | Description                        |
 |---------------------------|------------------------------------|
