@@ -1,6 +1,6 @@
 # JWT_authorization
 
-[English version](./README_en)
+[English version](./README_en.md)
 
 一个使用了JWT + MySQL + Redis + gRPC 技术栈的用户认证,权限控制的Demo项目,项目提供了HTTP接口以及gRPC接口
 
