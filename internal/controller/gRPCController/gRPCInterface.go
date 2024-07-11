@@ -1,7 +1,8 @@
-package service
+package gRPCController
 
 import (
 	"JWT_authorization/code"
+	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"JWT_authorization/proto"
 	"context"
@@ -11,15 +12,15 @@ import (
 
 type JwtAuthorizationServiceServer struct {
 	proto.UnimplementedJwtAuthorizationServiceServer
-	UserService
+	service.UserServiceImpl
 }
 
-func NewJwtAuthorizationServiceServer() *JwtAuthorizationServiceServer {
-	return &JwtAuthorizationServiceServer{}
+func NewJwtAuthorizationServiceServer(userService service.UserServiceImpl) *JwtAuthorizationServiceServer {
+	return &JwtAuthorizationServiceServer{UserServiceImpl: userService}
 }
 
 func (s *JwtAuthorizationServiceServer) UserLogin(ctx context.Context, req *proto.UserLoginRequest) (*proto.UserLoginResponse, error) {
-	resp, apiError := s.UserService.ProcessLoginRequest(model.UserLoginRequest{
+	resp, apiError := s.UserServiceImpl.ProcessLoginRequest(model.UserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -37,7 +38,7 @@ func (s *JwtAuthorizationServiceServer) UserLogin(ctx context.Context, req *prot
 }
 
 func (s *JwtAuthorizationServiceServer) AdminLogin(ctx context.Context, req *proto.AdminLoginRequest) (*proto.AdminLoginResponse, error) {
-	resp, apiError := s.UserService.ProcessLoginRequest(model.UserLoginRequest{
+	resp, apiError := s.UserServiceImpl.ProcessLoginRequest(model.UserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -53,7 +54,7 @@ func (s *JwtAuthorizationServiceServer) AdminLogin(ctx context.Context, req *pro
 }
 
 func (s *JwtAuthorizationServiceServer) UserRegister(ctx context.Context, req *proto.UserRegisterRequest) (*proto.UserRegisterResponse, error) {
-	resp, apiError := s.UserService.ProcessRegisterRequest(&model.UserRegisterRequest{
+	resp, apiError := s.UserServiceImpl.ProcessRegisterRequest(&model.UserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -67,7 +68,7 @@ func (s *JwtAuthorizationServiceServer) UserRegister(ctx context.Context, req *p
 }
 
 func (s *JwtAuthorizationServiceServer) RefreshToken(ctx context.Context, req *proto.RefreshTokenRequest) (*proto.RefreshTokenResponse, error) {
-	resp, apiError := s.UserService.ProcessRefreshToken(req.RefreshToken)
+	resp, apiError := s.UserServiceImpl.ProcessRefreshToken(req.RefreshToken)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -78,7 +79,7 @@ func (s *JwtAuthorizationServiceServer) RefreshToken(ctx context.Context, req *p
 
 func (s *JwtAuthorizationServiceServer) UserLogout(ctx context.Context, req *proto.UserLogoutRequest) (*proto.UserLogoutResponse, error) {
 	jwtToken := ctx.Value("AuthorizationToken").(string)
-	apiError := s.UserService.ProcessLogoutRequest(jwtToken)
+	apiError := s.UserServiceImpl.ProcessLogoutRequest(jwtToken)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -87,7 +88,7 @@ func (s *JwtAuthorizationServiceServer) UserLogout(ctx context.Context, req *pro
 
 func (s *JwtAuthorizationServiceServer) UserFrozen(ctx context.Context, req *proto.UserFrozenRequest) (*proto.UserFrozenResponse, error) {
 	userID := fmt.Sprintf("%v", ctx.Value("UserID"))
-	apiError := s.UserService.ProcessFreezeUser(userID)
+	apiError := s.UserServiceImpl.ProcessFreezeUser(userID)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -97,7 +98,7 @@ func (s *JwtAuthorizationServiceServer) UserFrozen(ctx context.Context, req *pro
 func (s *JwtAuthorizationServiceServer) CheckUserPermission(ctx context.Context, req *proto.UserCheckPermissionRequest) (*proto.UserCheckPermissionResponse, error) {
 	userID := fmt.Sprintf("%v", ctx.Value("UserID"))
 	permission, _ := strconv.Atoi(req.Permission)
-	hasPermission, apiError := s.UserService.CheckPermission(userID, permission)
+	hasPermission, apiError := s.UserServiceImpl.CheckPermission(userID, permission)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -108,7 +109,7 @@ func (s *JwtAuthorizationServiceServer) CheckUserPermission(ctx context.Context,
 
 func (s *JwtAuthorizationServiceServer) GetUserPermissions(ctx context.Context, req *proto.UserGetUserPermissionRequest) (*proto.UserGetUserPermissionResponse, error) {
 	userID := fmt.Sprintf("%v", ctx.Value("UserID"))
-	permissions, apiError := s.UserService.GetUserPermissions(userID)
+	permissions, apiError := s.UserServiceImpl.GetUserPermissions(userID)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -126,7 +127,7 @@ func (s *JwtAuthorizationServiceServer) AdminFrozenAccount(ctx context.Context, 
 		}
 	}
 
-	apiError := s.UserService.ProcessFreezeUser(req.UserId)
+	apiError := s.UserServiceImpl.ProcessFreezeUser(req.UserId)
 
 	if apiError != nil {
 		return nil, apiError
@@ -141,7 +142,7 @@ func (s *JwtAuthorizationServiceServer) AdminThawAccount(ctx context.Context, re
 			Message: "user is not an admin",
 		}
 	}
-	apiError := s.UserService.ProcessThawUser(req.UserId)
+	apiError := s.UserServiceImpl.ProcessThawUser(req.UserId)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -155,7 +156,7 @@ func (s *JwtAuthorizationServiceServer) AdminDeleteAccount(ctx context.Context, 
 			Message: "user is not an admin",
 		}
 	}
-	apiError := s.UserService.ProcessDeleteUser(req.UserId)
+	apiError := s.UserServiceImpl.ProcessDeleteUser(req.UserId)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -170,7 +171,7 @@ func (s *JwtAuthorizationServiceServer) AdminCheckPermission(ctx context.Context
 		}
 	}
 	pms, _ := strconv.Atoi(req.Permission)
-	hasPermission, apiError := s.UserService.CheckPermission(req.UserId, pms)
+	hasPermission, apiError := s.UserServiceImpl.CheckPermission(req.UserId, pms)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -187,7 +188,7 @@ func (s *JwtAuthorizationServiceServer) AdminAddUserPermission(ctx context.Conte
 		}
 	}
 	pms, _ := strconv.Atoi(req.Permission)
-	apiError := s.UserService.AddPermission(req.UserId, pms)
+	apiError := s.UserServiceImpl.AddPermission(req.UserId, pms)
 	if apiError != nil {
 		return nil, apiError
 	}
@@ -202,7 +203,7 @@ func (s *JwtAuthorizationServiceServer) AdminDeleteUserPermission(ctx context.Co
 		}
 	}
 	pms, _ := strconv.Atoi(req.Permission)
-	apiError := s.UserService.DeletePermission(req.UserId, pms)
+	apiError := s.UserServiceImpl.DeletePermission(req.UserId, pms)
 	if apiError != nil {
 		return nil, apiError
 	}

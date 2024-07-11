@@ -2,8 +2,9 @@ package route
 
 import (
 	"JWT_authorization/config"
+	"JWT_authorization/internal/controller/gRPCController"
+	"JWT_authorization/internal/controller/httpController"
 	"JWT_authorization/internal/dao"
-	"JWT_authorization/internal/httpController"
 	"JWT_authorization/internal/service"
 	"JWT_authorization/middleware"
 	"JWT_authorization/proto"
@@ -84,7 +85,9 @@ func StartGRPCServer() {
 		grpc.UnaryInterceptor(middleware.InterceptorSelector()),
 	)
 
-	proto.RegisterJwtAuthorizationServiceServer(grpcServer, service.NewJwtAuthorizationServiceServer())
+	userDAO := dao.NewUserDAOImpl(MySQL.GetMySQL(), Redis.GetRedis())
+	userService := service.NewUserService(*userDAO)
+	proto.RegisterJwtAuthorizationServiceServer(grpcServer, gRPCController.NewJwtAuthorizationServiceServer(*userService))
 	reflection.Register(grpcServer)
 
 	log.Println(fmt.Sprintf("gRPC server is running on %v", address))

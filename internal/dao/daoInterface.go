@@ -24,16 +24,11 @@ type UserDAO interface {
 }
 
 type UserDAOImpl struct {
-	// DB connection
-	db  *gorm.DB
-	rdb *redis.Client
-	ctx context.Context
+	*gorm.DB
+	*redis.Client
+	context.Context
 }
 
 func NewUserDAOImpl(db *gorm.DB, rdb *redis.Client) *UserDAOImpl {
-	return &UserDAOImpl{
-		db:  db,
-		rdb: rdb,
-		ctx: context.Background(),
-	}
+	return &UserDAOImpl{db, rdb, context.Background()}
 }

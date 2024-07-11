@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/httpController"
+	"JWT_authorization/internal/controller/httpController"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
