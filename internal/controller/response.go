@@ -61,3 +61,21 @@ func ResponseErrorWithMessage(c *gin.Context, code code.ResponseCode, message st
 	c.JSON(200, response)
 	return
 }
+
+// ResponseWithHttpStatus is a function that returns a response with a specific HTTP status code
+func ResponseWithHttpStatus(c *gin.Context, httpStatus int, code code.ResponseCode, message string) {
+	var msg string
+	if message == "" {
+		msg = code.Message()
+	} else {
+		msg = message
+	}
+	response := Response{
+		Code:    code,
+		Message: msg,
+		Error:   nil,
+		Data:    nil,
+	}
+	c.JSON(httpStatus, response)
+	return
+}

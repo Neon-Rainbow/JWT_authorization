@@ -32,8 +32,7 @@ func NewRouter() *gin.Engine {
 	userGroup := rootRouter.Group("/user")
 	userGroup.Use(middleware.JWTMiddleware())
 	{
-		userGroup.POST("/logout", middleware.JWTMiddleware(), controller.LogoutHandle)
-
+		userGroup.POST("/logout", controller.LogoutHandle)
 		userGroup.POST("/frozen_account", controller.FreezeUserHandle)
 		userGroup.POST("/delete_account", controller.DeleteUserHandle)
 
