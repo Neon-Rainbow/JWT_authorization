@@ -2,11 +2,10 @@ package service
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/dao"
 	"JWT_authorization/model"
 )
 
-func ProcessRegisterRequest(req *model.UserRegisterRequest) (*model.UserRegisterResponse, *model.ApiError) {
+func (s *UserServiceImpl) ProcessRegisterRequest(req *model.UserRegisterRequest) (*model.UserRegisterResponse, *model.ApiError) {
 	if req.Username == "" || req.Password == "" {
 		return nil, &model.ApiError{
 			Code:         code.RegisterParamsError,
@@ -15,7 +14,7 @@ func ProcessRegisterRequest(req *model.UserRegisterRequest) (*model.UserRegister
 		}
 	}
 
-	usernameExists, telephoneExists, err := dao.CheckUserExists(req.Username, req.Telephone)
+	usernameExists, telephoneExists, err := s.CheckUserExists(req.Username, req.Telephone)
 	if err != nil {
 		return nil, &model.ApiError{
 			Code:         code.RegisterCheckUserExistsError,
@@ -39,7 +38,7 @@ func ProcessRegisterRequest(req *model.UserRegisterRequest) (*model.UserRegister
 		}
 	}
 
-	user, err := dao.CreateUser(req.Username, EncryptPassword(req.Password), req.Telephone)
+	user, err := s.CreateUser(req.Username, EncryptPassword(req.Password), req.Telephone)
 	if err != nil {
 		return nil, &model.ApiError{
 			Code:         code.RegisterCreateUserError,

@@ -1,8 +1,7 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -14,7 +13,7 @@ type refreshTokenResult struct {
 	ApiError *model.ApiError
 }
 
-func RefreshTokenHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) RefreshTokenHandle(c *gin.Context) {
 	refreshToken := c.Query("refresh_token")
 	if refreshToken == "" {
 		ResponseErrorWithMessage(c, code.RefreshTokenError, "refresh_token is required")
@@ -27,7 +26,7 @@ func RefreshTokenHandle(c *gin.Context) {
 	resultChannel := make(chan refreshTokenResult)
 
 	go func() {
-		accessToken, err := service.ProcessRefreshToken(refreshToken)
+		accessToken, err := ctrl.userService.ProcessRefreshToken(refreshToken)
 		if err != nil {
 			resultChannel <- refreshTokenResult{
 				ApiError: err,

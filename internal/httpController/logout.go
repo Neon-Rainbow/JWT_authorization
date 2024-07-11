@@ -1,8 +1,7 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -10,7 +9,7 @@ import (
 )
 
 // LogoutHandle handles logout requests
-func LogoutHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) LogoutHandle(c *gin.Context) {
 	userID := GetUserID(c)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -19,7 +18,7 @@ func LogoutHandle(c *gin.Context) {
 	resultChannel := make(chan bool)
 
 	go func() {
-		apiError := service.ProcessLogoutRequest(userID)
+		apiError := ctrl.userService.ProcessLogoutRequest(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

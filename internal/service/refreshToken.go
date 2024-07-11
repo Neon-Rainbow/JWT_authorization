@@ -2,14 +2,13 @@ package service
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/dao"
 	"JWT_authorization/model"
 	"JWT_authorization/util/jwt"
 	"strconv"
 )
 
 // ProcessRefreshToken is a function to process refresh token
-func ProcessRefreshToken(refreshToken string) (newAccessToken string, apiError *model.ApiError) {
+func (s *UserServiceImpl) ProcessRefreshToken(refreshToken string) (newAccessToken string, apiError *model.ApiError) {
 	claims, err := jwt.ParseToken(refreshToken)
 	if err != nil {
 		return "", &model.ApiError{
@@ -19,7 +18,7 @@ func ProcessRefreshToken(refreshToken string) (newAccessToken string, apiError *
 		}
 	}
 
-	redisRefreshToken, err := dao.GetTokenFromRedis(strconv.Itoa(int(claims.UserID)))
+	redisRefreshToken, err := s.GetTokenFromRedis(strconv.Itoa(int(claims.UserID)))
 	if err != nil {
 		return "", &model.ApiError{
 			Code:         code.RefreshTokenError,
@@ -35,7 +34,7 @@ func ProcessRefreshToken(refreshToken string) (newAccessToken string, apiError *
 		}
 	}
 
-	isFrozen, err := dao.CheckUserFrozen(strconv.Itoa(int(claims.UserID)))
+	isFrozen, err := s.CheckUserFrozen(strconv.Itoa(int(claims.UserID)))
 	if err != nil {
 		return "", &model.ApiError{
 			Code:         code.RefreshTokenError,

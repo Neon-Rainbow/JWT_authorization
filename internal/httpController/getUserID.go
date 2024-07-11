@@ -1,4 +1,4 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"

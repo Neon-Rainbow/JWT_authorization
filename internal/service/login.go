@@ -2,14 +2,13 @@ package service
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/dao"
 	"JWT_authorization/model"
 	"JWT_authorization/util/jwt"
 	"strconv"
 )
 
-func ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
-	dbUser, err := dao.GetUserInformationByUsername(req.Username)
+func (s *UserServiceImpl) ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
+	dbUser, err := s.GetUserInformationByUsername(req.Username)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, &model.ApiError{
@@ -59,7 +58,7 @@ func ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, 
 		IsFrozen:     dbUser.IsFrozen,
 	}
 
-	err = dao.SetTokenToRedis(strconv.Itoa(int(dbUser.ID)), refreshToken)
+	err = s.SetTokenToRedis(strconv.Itoa(int(dbUser.ID)), refreshToken)
 	if err != nil {
 		return nil, &model.ApiError{
 			Code:         code.LoginGenerateTokenError,
@@ -71,8 +70,8 @@ func ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, 
 	return loginResponse, nil
 }
 
-func ProcessAdminLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
-	dbUser, err := dao.GetUserInformationByUsername(req.Username)
+func (s *UserServiceImpl) ProcessAdminLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
+	dbUser, err := s.GetUserInformationByUsername(req.Username)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, &model.ApiError{
@@ -130,7 +129,7 @@ func ProcessAdminLoginRequest(req model.UserLoginRequest) (*model.UserLoginRespo
 		IsFrozen:     dbUser.IsFrozen,
 	}
 
-	err = dao.SetTokenToRedis(strconv.Itoa(int(dbUser.ID)), refreshToken)
+	err = s.SetTokenToRedis(strconv.Itoa(int(dbUser.ID)), refreshToken)
 	if err != nil {
 		return nil, &model.ApiError{
 			Code:         code.LoginGenerateTokenError,

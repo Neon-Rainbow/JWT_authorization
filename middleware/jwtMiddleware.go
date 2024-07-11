@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/controller"
+	"JWT_authorization/internal/httpController"
 	"JWT_authorization/util/jwt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,16 +14,16 @@ func JWTMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		if authHeader == "" {
-			controller.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Authorization header is required")
-			//controller.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Authorization header is required")
+			httpController.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Authorization header is required")
+			//httpController.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Authorization header is required")
 			c.Abort()
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" || parts[1] == "" {
-			controller.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Authorization header format must be Bearer {token}")
-			//controller.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Authorization header format must be Bearer {token}")
+			httpController.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Authorization header format must be Bearer {token}")
+			//httpController.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Authorization header format must be Bearer {token}")
 			c.Abort()
 			return
 		}
@@ -31,15 +31,15 @@ func JWTMiddleware() func(c *gin.Context) {
 		tkn := parts[1]
 		myClaims, err := jwt.ParseToken(tkn)
 		if err != nil {
-			controller.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Invalid token")
-			//controller.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Invalid token")
+			httpController.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Invalid token")
+			//httpController.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Invalid token")
 			c.Abort()
 			return
 		}
 
 		if myClaims.TokenType != "access_token" {
-			controller.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Invalid token type, must be access_token")
-			//controller.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Invalid token type, must be access_token")
+			httpController.ResponseWithHttpStatus(c, http.StatusUnauthorized, code.RequestUnauthorized, "Invalid token type, must be access_token")
+			//httpController.ResponseErrorWithMessage(c, code.RequestUnauthorized, "Invalid token type, must be access_token")
 			c.Abort()
 			return
 		}

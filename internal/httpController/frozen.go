@@ -1,8 +1,7 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -11,7 +10,7 @@ import (
 )
 
 // FreezeUserHandle is a function to frozen user
-func FreezeUserHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) FreezeUserHandle(c *gin.Context) {
 	userID := GetUserID(c)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -25,7 +24,7 @@ func FreezeUserHandle(c *gin.Context) {
 
 	go func() {
 		defer wg.Done()
-		apiError := service.ProcessFreezeUser(userID)
+		apiError := ctrl.userService.ProcessFreezeUser(userID)
 		if apiError != nil {
 			//errorChannel is a channel without buffer, so it will block until the error is read
 			errorChannel <- apiError
@@ -36,7 +35,7 @@ func FreezeUserHandle(c *gin.Context) {
 
 	go func() {
 		defer wg.Done()
-		apiError := service.ChangeUserPermissions(userID, 0) // 0 means no permission
+		apiError := ctrl.userService.ChangeUserPermissions(userID, 0) // 0 means no permission
 		if apiError != nil {
 			//errorChannel is a channel without buffer, so it will block until the error is read
 			errorChannel <- apiError
@@ -64,7 +63,7 @@ func FreezeUserHandle(c *gin.Context) {
 	}
 }
 
-func ThawUserHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) ThawUserHandle(c *gin.Context) {
 	userID := c.Query("userID")
 	if userID == "" {
 		ResponseErrorWithCode(c, code.ThawUserIDRequired)
@@ -78,7 +77,7 @@ func ThawUserHandle(c *gin.Context) {
 	resultChannel := make(chan bool, 1)
 
 	go func() {
-		apiError := service.ProcessThawUser(userID)
+		apiError := ctrl.userService.ProcessThawUser(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"JWT_authorization/util/Redis"
 	"context"
 	"time"
 )
@@ -9,8 +8,9 @@ import (
 var ctx = context.Background()
 
 // SetTokenToRedis is a function to set token to redis
-func SetTokenToRedis(userID string, refreshToken string) error {
-	rdb := Redis.GetRedis()
+func (dao *UserDAOImpl) SetTokenToRedis(userID string, refreshToken string) error {
+	rdb := dao.rdb
+	ctx := dao.ctx
 	err := rdb.Set(ctx, userID, refreshToken, time.Hour*24*15).Err()
 	if err != nil {
 		return err
@@ -19,8 +19,9 @@ func SetTokenToRedis(userID string, refreshToken string) error {
 }
 
 // GetTokenFromRedis is a function to get token from redis
-func GetTokenFromRedis(userID string) (refreshToken string, err error) {
-	rdb := Redis.GetRedis()
+func (dao *UserDAOImpl) GetTokenFromRedis(userID string) (refreshToken string, err error) {
+	rdb := dao.rdb
+	ctx := dao.ctx
 	refreshToken, err = rdb.Get(ctx, userID).Result()
 	if err != nil {
 		return "", err
@@ -29,8 +30,9 @@ func GetTokenFromRedis(userID string) (refreshToken string, err error) {
 }
 
 // DeleteTokenFromRedis is a function to delete token from redis
-func DeleteTokenFromRedis(userID string) error {
-	rdb := Redis.GetRedis()
+func (dao *UserDAOImpl) DeleteTokenFromRedis(userID string) error {
+	rdb := dao.rdb
+	ctx := dao.ctx
 	err := rdb.Del(ctx, userID).Err()
 	if err != nil {
 		return err

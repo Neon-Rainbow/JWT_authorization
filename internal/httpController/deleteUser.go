@@ -1,15 +1,14 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"github.com/gin-gonic/gin"
 	"time"
 )
 
-func DeleteUserHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) DeleteUserHandle(c *gin.Context) {
 	userID := GetUserID(c)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -19,7 +18,7 @@ func DeleteUserHandle(c *gin.Context) {
 	resultChannel := make(chan bool, 1)
 
 	go func() {
-		apiError := service.ProcessDeleteUser(userID)
+		apiError := ctrl.userService.ProcessDeleteUser(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

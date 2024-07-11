@@ -2,12 +2,11 @@ package service
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/dao"
 	"JWT_authorization/model"
 )
 
-func ProcessFreezeUser(userID string) (apiError *model.ApiError) {
-	err := dao.FreezeUser(userID)
+func (s *UserServiceImpl) ProcessFreezeUser(userID string) (apiError *model.ApiError) {
+	err := s.FreezeUser(userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.FrozenUserError,
@@ -15,7 +14,7 @@ func ProcessFreezeUser(userID string) (apiError *model.ApiError) {
 			ErrorMessage: err,
 		}
 	}
-	err = dao.DeleteTokenFromRedis(userID)
+	err = s.DeleteTokenFromRedis(userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.FrozenUserError,
@@ -28,8 +27,8 @@ func ProcessFreezeUser(userID string) (apiError *model.ApiError) {
 }
 
 // ProcessThawUser is a function to thaw user
-func ProcessThawUser(userID string) *model.ApiError {
-	err := dao.ThawUser(userID)
+func (s *UserServiceImpl) ProcessThawUser(userID string) *model.ApiError {
+	err := s.ThawUser(userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.ThawUserError,

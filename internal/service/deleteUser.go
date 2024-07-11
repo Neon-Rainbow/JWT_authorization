@@ -2,13 +2,12 @@ package service
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/dao"
 	"JWT_authorization/model"
 	"context"
 	"time"
 )
 
-func ProcessDeleteUser(userID string) *model.ApiError {
+func (s *UserServiceImpl) ProcessDeleteUser(userID string) *model.ApiError {
 
 	errorChannel := make(chan *model.ApiError, 1)
 	resultChannel := make(chan bool, 2)
@@ -17,7 +16,7 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 	defer cancel()
 
 	go func() {
-		err := dao.DeleteUser(userID)
+		err := s.DeleteUser(userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
 				Code:         code.DeleteUserTokenError,
@@ -30,7 +29,7 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 	}()
 
 	go func() {
-		err := dao.DeleteTokenFromRedis(userID)
+		err := s.DeleteTokenFromRedis(userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
 				Code:         code.DeleteUserTokenError,

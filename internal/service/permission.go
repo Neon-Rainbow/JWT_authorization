@@ -2,14 +2,13 @@ package service
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/dao"
 	"JWT_authorization/model"
 )
 
 // CheckPermission checks if a user has a specific permission
 // used to check if the user has the permission of the permissionNumber
-func CheckPermission(userID string, permissionNumber int) (isAllowed bool, apiError *model.ApiError) {
-	userPermissions, err := dao.GetUserPermissions(userID)
+func (s *UserServiceImpl) CheckPermission(userID string, permissionNumber int) (isAllowed bool, apiError *model.ApiError) {
+	userPermissions, err := s.GetUserPermissions(userID)
 	if err != nil {
 		return false, &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -22,8 +21,8 @@ func CheckPermission(userID string, permissionNumber int) (isAllowed bool, apiEr
 
 // AddPermission adds a permission to a user
 // used to add the permission of the permissionNumber to the user
-func AddPermission(userID string, permissionNumber int) *model.ApiError {
-	userPermissions, err := dao.GetUserPermissions(userID)
+func (s *UserServiceImpl) AddPermission(userID string, permissionNumber int) *model.ApiError {
+	userPermissions, err := s.GetUserPermissions(userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -34,7 +33,7 @@ func AddPermission(userID string, permissionNumber int) *model.ApiError {
 
 	newPermissions := userPermissions | (1 << (permissionNumber - 1))
 
-	err = dao.ChangeUserPermissions(userID, newPermissions)
+	err = s.ChangeUserPermissions(userID, newPermissions)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionChangeError,
@@ -47,8 +46,8 @@ func AddPermission(userID string, permissionNumber int) *model.ApiError {
 
 // DeletePermission deletes a permission from a user
 // used to delete the permission of the permissionNumber from the user
-func DeletePermission(userID string, permissionNumber int) *model.ApiError {
-	userPermissions, err := dao.GetUserPermissions(userID)
+func (s *UserServiceImpl) DeletePermission(userID string, permissionNumber int) *model.ApiError {
+	userPermissions, err := s.GetUserPermissions(userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -59,7 +58,7 @@ func DeletePermission(userID string, permissionNumber int) *model.ApiError {
 
 	newPermissions := userPermissions &^ (1 << (permissionNumber - 1))
 
-	err = dao.ChangeUserPermissions(userID, newPermissions)
+	err = s.ChangeUserPermissions(userID, newPermissions)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionChangeError,
@@ -72,8 +71,8 @@ func DeletePermission(userID string, permissionNumber int) *model.ApiError {
 
 // GetUserPermissions gets the permissions of a user
 // used to get the permissions of the user
-func GetUserPermissions(userID string) (int, *model.ApiError) {
-	userPermissions, err := dao.GetUserPermissions(userID)
+func (s *UserServiceImpl) GetUserPermissions(userID string) (int, *model.ApiError) {
+	userPermissions, err := s.GetUserPermissions(userID)
 	if err != nil {
 		return 0, &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -84,8 +83,8 @@ func GetUserPermissions(userID string) (int, *model.ApiError) {
 	return userPermissions, nil
 }
 
-func ChangeUserPermissions(userID string, permission int) *model.ApiError {
-	err := dao.ChangeUserPermissions(userID, permission)
+func (s *UserServiceImpl) ChangeUserPermissions(userID string, permission int) *model.ApiError {
+	err := s.ChangeUserPermissions(userID, permission)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionChangeError,

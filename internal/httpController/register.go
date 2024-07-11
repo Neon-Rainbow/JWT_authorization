@@ -1,8 +1,7 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"errors"
@@ -16,7 +15,7 @@ type registerResult struct {
 }
 
 // RegisterHandle handles user registration requests
-func RegisterHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) RegisterHandle(c *gin.Context) {
 	// Create a context with a 5-second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -39,7 +38,7 @@ func RegisterHandle(c *gin.Context) {
 			return
 		}
 
-		registerResponse, apiError := service.ProcessRegisterRequest(&registerRequest)
+		registerResponse, apiError := ctrl.userService.ProcessRegisterRequest(&registerRequest)
 		// Send the response or error to the result channel
 		resultChannel <- registerResult{
 			Response: registerResponse,

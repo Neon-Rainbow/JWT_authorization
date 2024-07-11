@@ -1,8 +1,7 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"errors"
@@ -12,7 +11,7 @@ import (
 	"time"
 )
 
-func CheckUserPermissionsHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) CheckUserPermissionsHandle(c *gin.Context) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -34,7 +33,7 @@ func CheckUserPermissionsHandle(c *gin.Context) {
 			return
 		}
 
-		isAllowed, apiError := service.CheckPermission(userID, permissionNumber)
+		isAllowed, apiError := ctrl.userService.CheckPermission(userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -60,7 +59,7 @@ func CheckUserPermissionsHandle(c *gin.Context) {
 	}
 }
 
-func GetUserPermissionHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) GetUserPermissionHandle(c *gin.Context) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -71,7 +70,7 @@ func GetUserPermissionHandle(c *gin.Context) {
 	go func() {
 		userID := GetUserID(c)
 
-		userPermissions, apiError := service.GetUserPermissions(userID)
+		userPermissions, apiError := ctrl.userService.GetUserPermissions(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -104,7 +103,7 @@ func GetUserPermissionHandle(c *gin.Context) {
 	}
 }
 
-func AddUserPermissionHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) AddUserPermissionHandle(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -125,7 +124,7 @@ func AddUserPermissionHandle(c *gin.Context) {
 			return
 		}
 
-		apiError := service.AddPermission(userID, permissionNumber)
+		apiError := ctrl.userService.AddPermission(userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -151,7 +150,7 @@ func AddUserPermissionHandle(c *gin.Context) {
 	}
 }
 
-func DeleteUserPermissionHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) DeleteUserPermissionHandle(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -172,7 +171,7 @@ func DeleteUserPermissionHandle(c *gin.Context) {
 			return
 		}
 
-		apiError := service.DeletePermission(userID, permissionNumber)
+		apiError := ctrl.userService.DeletePermission(userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

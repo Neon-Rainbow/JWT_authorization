@@ -1,8 +1,7 @@
-package controller
+package httpController
 
 import (
 	"JWT_authorization/code"
-	"JWT_authorization/internal/service"
 	"JWT_authorization/model"
 	"context"
 	"errors"
@@ -16,7 +15,7 @@ type loginResult struct {
 }
 
 // LoginHandler handles login requests
-func LoginHandler(c *gin.Context) {
+func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 	// Create a context with a 5-second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -39,7 +38,7 @@ func LoginHandler(c *gin.Context) {
 		}
 
 		// Handle the login logic using the service layer
-		loginResponse, apiError := service.ProcessLoginRequest(loginRequest)
+		loginResponse, apiError := ctrl.userService.ProcessLoginRequest(loginRequest)
 		// Send the response or error to the result channel
 		resultChannel <- loginResult{
 			Response: loginResponse,
@@ -71,7 +70,7 @@ func LoginHandler(c *gin.Context) {
 }
 
 // AdminLoginHandle handles admin login requests
-func AdminLoginHandle(c *gin.Context) {
+func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 	// Create a context with a 5-second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -94,7 +93,7 @@ func AdminLoginHandle(c *gin.Context) {
 		}
 
 		// Handle the login logic using the service layer
-		loginResponse, apiError := service.ProcessAdminLoginRequest(loginRequest)
+		loginResponse, apiError := ctrl.userService.ProcessAdminLoginRequest(loginRequest)
 		// Send the response or error to the result channel
 		resultChannel <- loginResult{
 			Response: loginResponse,
