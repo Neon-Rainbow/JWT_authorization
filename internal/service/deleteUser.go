@@ -20,9 +20,9 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 		err := dao.DeleteUser(userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.DeleteUserTokenError,
-				Message: "delete user error",
-				Error:   err,
+				Code:         code.DeleteUserTokenError,
+				Message:      "delete user error",
+				ErrorMessage: err,
 			}
 			return
 		}
@@ -33,9 +33,9 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 		err := dao.DeleteTokenFromRedis(userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.DeleteUserTokenError,
-				Message: "delete token from redis error",
-				Error:   err,
+				Code:         code.DeleteUserTokenError,
+				Message:      "delete token from redis error",
+				ErrorMessage: err,
 			}
 			return
 		}
@@ -50,9 +50,9 @@ func ProcessDeleteUser(userID string) *model.ApiError {
 			continue
 		case <-ctx.Done():
 			return &model.ApiError{
-				Code:    code.RequestTimeout,
-				Message: "request timeout",
-				Error:   nil,
+				Code:         code.RequestTimeout,
+				Message:      "request timeout",
+				ErrorMessage: nil,
 			}
 		}
 	}

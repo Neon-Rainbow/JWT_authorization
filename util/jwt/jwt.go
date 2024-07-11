@@ -109,7 +109,7 @@ func GenerateToken(username string, userId uint, isAdmin bool) (accessToken stri
 // @description Parses a JWT token
 // @param tokenString string The JWT token string
 // @return *MyClaims The claims in the JWT token
-// @return error Error information
+// @return error ErrorMessage information
 func ParseToken(tokenString string) (*MyClaims, error) {
 	// Retrieve the secret key from the configuration
 	var jwtSecret = config.GetConfig().JWT.Secret

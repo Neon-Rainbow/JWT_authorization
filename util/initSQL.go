@@ -42,7 +42,7 @@ func Init() {
 		case <-resultChannel:
 			// Successfully initialized the database
 		case err := <-errorChannel:
-			log.Fatalf("Error initializing the database: %v", err)
+			log.Fatalf("ErrorMessage initializing the database: %v", err)
 		case <-ctx.Done():
 			log.Fatalf("Timeout initializing the database")
 		}

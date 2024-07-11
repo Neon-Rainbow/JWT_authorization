@@ -27,9 +27,9 @@ func CheckUserPermissionsHandle(c *gin.Context) {
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.PermissionParamsError,
-				Message: code.PermissionParamsError.Message(),
-				Error:   err,
+				Code:         code.PermissionParamsError,
+				Message:      code.PermissionParamsError.Message(),
+				ErrorMessage: err,
 			}
 			return
 		}
@@ -118,9 +118,9 @@ func AddUserPermissionHandle(c *gin.Context) {
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.PermissionParamsError,
-				Message: code.PermissionParamsError.Message(),
-				Error:   err,
+				Code:         code.PermissionParamsError,
+				Message:      code.PermissionParamsError.Message(),
+				ErrorMessage: err,
 			}
 			return
 		}
@@ -165,9 +165,9 @@ func DeleteUserPermissionHandle(c *gin.Context) {
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {
 			errorChannel <- &model.ApiError{
-				Code:    code.PermissionParamsError,
-				Message: code.PermissionParamsError.Message(),
-				Error:   err,
+				Code:         code.PermissionParamsError,
+				Message:      code.PermissionParamsError.Message(),
+				ErrorMessage: err,
 			}
 			return
 		}

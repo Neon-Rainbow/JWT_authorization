@@ -13,40 +13,40 @@ func ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, 
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, &model.ApiError{
-				Code:    code.LoginUserNotFound,
-				Message: code.LoginUserNotFound.Message(),
-				Error:   err,
+				Code:         code.LoginUserNotFound,
+				Message:      code.LoginUserNotFound.Message(),
+				ErrorMessage: err,
 			}
 		}
 		return nil, &model.ApiError{
-			Code:    code.LoginGetUserInformationError,
-			Message: code.LoginGetUserInformationError.Message(),
-			Error:   err,
+			Code:         code.LoginGetUserInformationError,
+			Message:      code.LoginGetUserInformationError.Message(),
+			ErrorMessage: err,
 		}
 	}
 
 	if dbUser.IsFrozen {
 		return nil, &model.ApiError{
-			Code:    code.LoginUserIsFrozen,
-			Message: code.LoginUserIsFrozen.Message(),
-			Error:   nil,
+			Code:         code.LoginUserIsFrozen,
+			Message:      code.LoginUserIsFrozen.Message(),
+			ErrorMessage: nil,
 		}
 	}
 
 	if dbUser.Password != EncryptPassword(req.Password) {
 		return nil, &model.ApiError{
-			Code:    code.LoginPasswordError,
-			Message: code.LoginPasswordError.Message(),
-			Error:   nil,
+			Code:         code.LoginPasswordError,
+			Message:      code.LoginPasswordError.Message(),
+			ErrorMessage: nil,
 		}
 	}
 
 	accessToken, refreshToken, err := jwt.GenerateToken(dbUser.Username, dbUser.ID, false)
 	if err != nil {
 		return nil, &model.ApiError{
-			Code:    code.LoginGenerateTokenError,
-			Message: code.LoginGenerateTokenError.Message(),
-			Error:   err,
+			Code:         code.LoginGenerateTokenError,
+			Message:      code.LoginGenerateTokenError.Message(),
+			ErrorMessage: err,
 		}
 	}
 
@@ -62,9 +62,9 @@ func ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, 
 	err = dao.SetTokenToRedis(strconv.Itoa(int(dbUser.ID)), refreshToken)
 	if err != nil {
 		return nil, &model.ApiError{
-			Code:    code.LoginGenerateTokenError,
-			Message: code.LoginGenerateTokenError.Message(),
-			Error:   err,
+			Code:         code.LoginGenerateTokenError,
+			Message:      code.LoginGenerateTokenError.Message(),
+			ErrorMessage: err,
 		}
 	}
 
@@ -76,48 +76,48 @@ func ProcessAdminLoginRequest(req model.UserLoginRequest) (*model.UserLoginRespo
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, &model.ApiError{
-				Code:    code.LoginUserNotFound,
-				Message: code.LoginUserNotFound.Message(),
-				Error:   err,
+				Code:         code.LoginUserNotFound,
+				Message:      code.LoginUserNotFound.Message(),
+				ErrorMessage: err,
 			}
 		}
 		return nil, &model.ApiError{
-			Code:    code.LoginGetUserInformationError,
-			Message: code.LoginGetUserInformationError.Message(),
-			Error:   err,
+			Code:         code.LoginGetUserInformationError,
+			Message:      code.LoginGetUserInformationError.Message(),
+			ErrorMessage: err,
 		}
 	}
 
 	if dbUser.IsFrozen {
 		return nil, &model.ApiError{
-			Code:    code.LoginUserIsFrozen,
-			Message: code.LoginUserIsFrozen.Message(),
-			Error:   nil,
+			Code:         code.LoginUserIsFrozen,
+			Message:      code.LoginUserIsFrozen.Message(),
+			ErrorMessage: nil,
 		}
 	}
 
 	if dbUser.Password != EncryptPassword(req.Password) {
 		return nil, &model.ApiError{
-			Code:    code.LoginPasswordError,
-			Message: code.LoginPasswordError.Message(),
-			Error:   nil,
+			Code:         code.LoginPasswordError,
+			Message:      code.LoginPasswordError.Message(),
+			ErrorMessage: nil,
 		}
 	}
 
 	if !dbUser.IsAdmin {
 		return nil, &model.ApiError{
-			Code:    code.LoginPasswordError,
-			Message: "user is not admin",
-			Error:   nil,
+			Code:         code.LoginPasswordError,
+			Message:      "user is not admin",
+			ErrorMessage: nil,
 		}
 	}
 
 	accessToken, refreshToken, err := jwt.GenerateToken(dbUser.Username, dbUser.ID, dbUser.IsAdmin)
 	if err != nil {
 		return nil, &model.ApiError{
-			Code:    code.LoginGenerateTokenError,
-			Message: code.LoginGenerateTokenError.Message(),
-			Error:   err,
+			Code:         code.LoginGenerateTokenError,
+			Message:      code.LoginGenerateTokenError.Message(),
+			ErrorMessage: err,
 		}
 	}
 
@@ -133,9 +133,9 @@ func ProcessAdminLoginRequest(req model.UserLoginRequest) (*model.UserLoginRespo
 	err = dao.SetTokenToRedis(strconv.Itoa(int(dbUser.ID)), refreshToken)
 	if err != nil {
 		return nil, &model.ApiError{
-			Code:    code.LoginGenerateTokenError,
-			Message: code.LoginGenerateTokenError.Message(),
-			Error:   err,
+			Code:         code.LoginGenerateTokenError,
+			Message:      code.LoginGenerateTokenError.Message(),
+			ErrorMessage: err,
 		}
 	}
 

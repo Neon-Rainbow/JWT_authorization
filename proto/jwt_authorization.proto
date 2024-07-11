@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./proto;proto";
+
+message UserLoginRequest {
+  string username = 1;
+  string password = 2;
+}
+message UserLoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  uint32 user_id = 3;
+  string username = 4;
+  bool is_admin = 5;
+  bool is_frozen = 6;
+}
+
+message AdminLoginRequest {
+  string username = 1;
+  string password = 2;
+}
+message AdminLoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  uint32 admin_id = 3;
+  string username = 4;
+}
+
+message UserRegisterRequest{
+  string username = 1;
+  string password = 2;
+  string telephone = 3;
+}
+message UserRegisterResponse{
+  uint32 user_id = 1;
+  string username = 2;
+}
+
+message RefreshTokenRequest{
+  string refresh_token = 1;
+}
+message RefreshTokenResponse{
+  string access_token = 1;
+}
+
+message UserLogoutRequest{}
+message UserLogoutResponse{}
+
+message UserFrozenRequest{}
+message UserFrozenResponse{}
+
+message UserCheckPermissionRequest{
+  string permission = 1;
+}
+message UserCheckPermissionResponse{
+  bool has_permission = 1;
+}
+
+message UserGetUserPermissionRequest{}
+message UserGetUserPermissionResponse{
+  string permissions = 1;
+}
+
+message AdminFrozenAccountRequest{
+  string user_id = 1;
+}
+message AdminFrozenAccountResponse{}
+
+message AdminThawAccountRequest{
+  string user_id = 1;
+}
+message AdminThawAccountResponse{}
+
+message AdminDeleteAccountRequest{
+  string user_id = 1;
+}
+message AdminDeleteAccountResponse{}
+
+message AdminCheckPermissionRequest{
+  string user_id = 1;
+  string permission = 2;
+}
+message AdminCheckPermissionResponse{
+  bool has_permission = 1;
+}
+
+message AdminGetUserPermissionRequest{
+  string user_id = 1;
+}
+message AdminGetUserPermissionResponse{
+  repeated string permissions = 1;
+}
+
+message AdminAddUserPermissionRequest{
+  string user_id = 1;
+  string permission = 2;
+}
+message AdminAddUserPermissionResponse{}
+
+message AdminDeleteUserPermissionRequest{
+  string user_id = 1;
+  string permission = 2;
+}
+message AdminDeleteUserPermissionResponse{}
+
+
+service JwtAuthorizationService {
+  rpc UserLogin(UserLoginRequest) returns (UserLoginResponse);
+  rpc AdminLogin(AdminLoginRequest) returns (AdminLoginResponse);
+
+  rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+
+  rpc UserLogout(UserLogoutRequest) returns (UserLogoutResponse);
+  rpc UserFrozen(UserFrozenRequest) returns (UserFrozenResponse);
+
+  rpc CheckUserPermission(UserCheckPermissionRequest) returns (UserCheckPermissionResponse);
+  rpc GetUserPermission(UserGetUserPermissionRequest) returns (UserGetUserPermissionResponse);
+
+  rpc AdminFrozenAccount(AdminFrozenAccountRequest) returns (AdminFrozenAccountResponse);
+  rpc AdminThawAccount(AdminThawAccountRequest) returns (AdminThawAccountResponse);
+  rpc AdminDeleteAccount(AdminDeleteAccountRequest) returns (AdminDeleteAccountResponse);
+  rpc AdminCheckPermission(AdminCheckPermissionRequest) returns (AdminCheckPermissionResponse);
+  rpc AdminGetUserPermission(AdminGetUserPermissionRequest) returns (AdminGetUserPermissionResponse);
+  rpc AdminAddUserPermission(AdminAddUserPermissionRequest) returns (AdminAddUserPermissionResponse);
+  rpc AdminDeleteUserPermission(AdminDeleteUserPermissionRequest) returns (AdminDeleteUserPermissionResponse);
+}
+

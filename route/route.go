@@ -2,8 +2,14 @@ package route
 
 import (
 	"JWT_authorization/internal/controller"
+	"JWT_authorization/internal/service"
 	"JWT_authorization/middleware"
+	"JWT_authorization/proto"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"log"
+	"net"
 )
 
 func NewRouter() *gin.Engine {
@@ -56,4 +62,25 @@ func NewRouter() *gin.Engine {
 
 	return router
 
+}
+
+func StartGRPCServer() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			middleware.AuthInterceptor(),
+		),
+	)
+
+	proto.RegisterJwtAuthorizationServiceServer(grpcServer, service.NewJwtAuthorizationServiceServer())
+	reflection.Register(grpcServer)
+
+	log.Println("gRPC server is running on port :50051")
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

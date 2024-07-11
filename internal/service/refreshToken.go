@@ -13,51 +13,51 @@ func ProcessRefreshToken(refreshToken string) (newAccessToken string, apiError *
 	claims, err := jwt.ParseToken(refreshToken)
 	if err != nil {
 		return "", &model.ApiError{
-			Code:    code.RefreshTokenError,
-			Message: "refresh token invalid",
-			Error:   err,
+			Code:         code.RefreshTokenError,
+			Message:      "refresh token invalid",
+			ErrorMessage: err,
 		}
 	}
 
 	redisRefreshToken, err := dao.GetTokenFromRedis(strconv.Itoa(int(claims.UserID)))
 	if err != nil {
 		return "", &model.ApiError{
-			Code:    code.RefreshTokenError,
-			Message: code.RefreshTokenError.Message(),
-			Error:   err,
+			Code:         code.RefreshTokenError,
+			Message:      code.RefreshTokenError.Message(),
+			ErrorMessage: err,
 		}
 	}
 	if redisRefreshToken != refreshToken {
 		return "", &model.ApiError{
-			Code:    code.RefreshTokenError,
-			Message: "refresh token not match, please login again",
-			Error:   nil,
+			Code:         code.RefreshTokenError,
+			Message:      "refresh token not match, please login again",
+			ErrorMessage: nil,
 		}
 	}
 
 	isFrozen, err := dao.CheckUserFrozen(strconv.Itoa(int(claims.UserID)))
 	if err != nil {
 		return "", &model.ApiError{
-			Code:    code.RefreshTokenError,
-			Message: "check user frozen error",
-			Error:   err,
+			Code:         code.RefreshTokenError,
+			Message:      "check user frozen error",
+			ErrorMessage: err,
 		}
 	}
 
 	if isFrozen {
 		return "", &model.ApiError{
-			Code:    code.RefreshTokenError,
-			Message: "user is frozen",
-			Error:   nil,
+			Code:         code.RefreshTokenError,
+			Message:      "user is frozen",
+			ErrorMessage: nil,
 		}
 	}
 
 	newAccessToken, _, err = jwt.GenerateToken(claims.Username, claims.UserID, claims.IsAdmin)
 	if err != nil {
 		return "", &model.ApiError{
-			Code:    code.RefreshTokenError,
-			Message: "generate token error",
-			Error:   err,
+			Code:         code.RefreshTokenError,
+			Message:      "generate token error",
+			ErrorMessage: err,
 		}
 	}
 	return newAccessToken, nil

@@ -31,9 +31,9 @@ func RegisterHandle(c *gin.Context) {
 			// Send the error to the result channel
 			resultChannel <- registerResult{
 				ApiError: &model.ApiError{
-					Code:    code.RegisterParamsError,
-					Message: code.RegisterParamsError.Message(),
-					Error:   err,
+					Code:         code.RegisterParamsError,
+					Message:      code.RegisterParamsError.Message(),
+					ErrorMessage: err,
 				},
 			}
 			return

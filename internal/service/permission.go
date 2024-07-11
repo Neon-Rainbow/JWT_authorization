@@ -12,9 +12,9 @@ func CheckPermission(userID string, permissionNumber int) (isAllowed bool, apiEr
 	userPermissions, err := dao.GetUserPermissions(userID)
 	if err != nil {
 		return false, &model.ApiError{
-			Code:    code.PermissionGetError,
-			Message: "get user permissions error",
-			Error:   err,
+			Code:         code.PermissionGetError,
+			Message:      "get user permissions error",
+			ErrorMessage: err,
 		}
 	}
 	return (1<<(permissionNumber-1))&userPermissions != 0, nil
@@ -26,9 +26,9 @@ func AddPermission(userID string, permissionNumber int) *model.ApiError {
 	userPermissions, err := dao.GetUserPermissions(userID)
 	if err != nil {
 		return &model.ApiError{
-			Code:    code.PermissionGetError,
-			Message: "get user permissions error",
-			Error:   err,
+			Code:         code.PermissionGetError,
+			Message:      "get user permissions error",
+			ErrorMessage: err,
 		}
 	}
 
@@ -37,9 +37,9 @@ func AddPermission(userID string, permissionNumber int) *model.ApiError {
 	err = dao.ChangeUserPermissions(userID, newPermissions)
 	if err != nil {
 		return &model.ApiError{
-			Code:    code.PermissionChangeError,
-			Message: "add user permissions error",
-			Error:   err,
+			Code:         code.PermissionChangeError,
+			Message:      "add user permissions error",
+			ErrorMessage: err,
 		}
 	}
 	return nil
@@ -51,9 +51,9 @@ func DeletePermission(userID string, permissionNumber int) *model.ApiError {
 	userPermissions, err := dao.GetUserPermissions(userID)
 	if err != nil {
 		return &model.ApiError{
-			Code:    code.PermissionGetError,
-			Message: "get user permissions error",
-			Error:   err,
+			Code:         code.PermissionGetError,
+			Message:      "get user permissions error",
+			ErrorMessage: err,
 		}
 	}
 
@@ -62,9 +62,9 @@ func DeletePermission(userID string, permissionNumber int) *model.ApiError {
 	err = dao.ChangeUserPermissions(userID, newPermissions)
 	if err != nil {
 		return &model.ApiError{
-			Code:    code.PermissionChangeError,
-			Message: "add user permissions error",
-			Error:   err,
+			Code:         code.PermissionChangeError,
+			Message:      "add user permissions error",
+			ErrorMessage: err,
 		}
 	}
 	return nil
@@ -76,9 +76,9 @@ func GetUserPermissions(userID string) (int, *model.ApiError) {
 	userPermissions, err := dao.GetUserPermissions(userID)
 	if err != nil {
 		return 0, &model.ApiError{
-			Code:    code.PermissionGetError,
-			Message: "get user permissions error",
-			Error:   err,
+			Code:         code.PermissionGetError,
+			Message:      "get user permissions error",
+			ErrorMessage: err,
 		}
 	}
 	return userPermissions, nil
@@ -88,9 +88,9 @@ func ChangeUserPermissions(userID string, permission int) *model.ApiError {
 	err := dao.ChangeUserPermissions(userID, permission)
 	if err != nil {
 		return &model.ApiError{
-			Code:    code.PermissionChangeError,
-			Message: "change user permissions error",
-			Error:   err,
+			Code:         code.PermissionChangeError,
+			Message:      "change user permissions error",
+			ErrorMessage: err,
 		}
 	}
 	return nil

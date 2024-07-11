@@ -39,7 +39,7 @@ func ResponseErrorWithApiError(c *gin.Context, apiError *model.ApiError) {
 	response := Response{
 		Code:    apiError.Code,
 		Message: apiError.Message,
-		Error:   apiError.Error,
+		Error:   apiError.ErrorMessage,
 		Data:    nil,
 	}
 	c.JSON(http.StatusOK, response)
