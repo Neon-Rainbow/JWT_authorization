@@ -28,12 +28,18 @@ type JWT struct {
 	Secret string `json:"secret"`
 }
 
+type gRPC struct {
+	Address string `json:"address"`
+	Port    int    `json:"port"`
+}
+
 type Config struct {
 	Address        string `json:"address"`
 	Port           int    `json:"port"`
 	MySQL          MySQL  `json:"MySQL"`
 	Redis          Redis  `json:"Redis"`
 	JWT            JWT    `json:"JWT"`
+	GRPC           gRPC   `json:"gRPC"`
 	PasswordSecret string `json:"passwordSecret"`
 }
 

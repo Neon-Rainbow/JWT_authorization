@@ -83,12 +83,60 @@ func RequiresAuthAndAdminInterceptor(method string) bool {
 
 func requiresAuthInterceptor(method string) bool {
 	switch method {
-	case "/proto.JwtAuthorizationService/UserLogout",
-		"/proto.JwtAuthorizationService/UserFrozen",
-		"/proto.JwtAuthorizationService/CheckUserPermission",
-		"/proto.JwtAuthorizationService/GetUserPermission":
-		return true
-	default:
+	case "/proto.JwtAuthorizationService/UserLogin",
+		"/proto.JwtAuthorizationService/AdminLogin",
+		"/proto.JwtAuthorizationService/UserRegister",
+		"/proto.JwtAuthorizationService/RefreshToken":
 		return false
+	default:
+		return true
+	}
+}
+
+// InterceptorSelector 根据方法名称选择拦截器
+func InterceptorSelector() grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		var interceptors []grpc.UnaryServerInterceptor
+
+		method := info.FullMethod
+		if requiresAuthInterceptor(method) {
+			interceptors = append(interceptors, AuthInterceptor())
+		}
+
+		// 如果没有选择拦截器，则直接调用处理器
+		if len(interceptors) == 0 {
+			return handler(ctx, req)
+		}
+
+		// 链接拦截器
+		chainedInterceptor := chainInterceptors(interceptors...)
+		return chainedInterceptor(ctx, req, info, handler)
+	}
+}
+
+func chainInterceptors(interceptors ...grpc.UnaryServerInterceptor) grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		var lastHandler grpc.UnaryHandler
+		lastHandler = handler
+
+		for i := len(interceptors) - 1; i >= 0; i-- {
+			next := lastHandler
+			currentInterceptor := interceptors[i]
+			lastHandler = func(currentCtx context.Context, currentReq interface{}) (interface{}, error) {
+				return currentInterceptor(currentCtx, currentReq, info, next)
+			}
+		}
+
+		return lastHandler(ctx, req)
 	}
 }
