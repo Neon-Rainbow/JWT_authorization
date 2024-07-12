@@ -18,7 +18,7 @@ func (ctrl *UserControllerImpl) DeleteUserHandle(c *gin.Context) {
 	resultChannel := make(chan bool, 1)
 
 	go func() {
-		apiError := ctrl.userService.ProcessDeleteUser(userID)
+		apiError := ctrl.ProcessDeleteUser(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

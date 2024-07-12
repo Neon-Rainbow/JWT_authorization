@@ -33,7 +33,7 @@ func (ctrl *UserControllerImpl) CheckUserPermissionsHandle(c *gin.Context) {
 			return
 		}
 
-		isAllowed, apiError := ctrl.userService.CheckPermission(userID, permissionNumber)
+		isAllowed, apiError := ctrl.CheckPermission(userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -70,7 +70,7 @@ func (ctrl *UserControllerImpl) GetUserPermissionHandle(c *gin.Context) {
 	go func() {
 		userID := GetUserID(c)
 
-		userPermissions, apiError := ctrl.userService.GetUserPermissions(userID)
+		userPermissions, apiError := ctrl.GetUserPermissions(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -124,7 +124,7 @@ func (ctrl *UserControllerImpl) AddUserPermissionHandle(c *gin.Context) {
 			return
 		}
 
-		apiError := ctrl.userService.AddPermission(userID, permissionNumber)
+		apiError := ctrl.AddPermission(userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -171,7 +171,7 @@ func (ctrl *UserControllerImpl) DeleteUserPermissionHandle(c *gin.Context) {
 			return
 		}
 
-		apiError := ctrl.userService.DeletePermission(userID, permissionNumber)
+		apiError := ctrl.DeletePermission(userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

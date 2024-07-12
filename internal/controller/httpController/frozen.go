@@ -24,7 +24,7 @@ func (ctrl *UserControllerImpl) FreezeUserHandle(c *gin.Context) {
 
 	go func() {
 		defer wg.Done()
-		apiError := ctrl.userService.ProcessFreezeUser(userID)
+		apiError := ctrl.ProcessFreezeUser(userID)
 		if apiError != nil {
 			//errorChannel is a channel without buffer, so it will block until the error is read
 			errorChannel <- apiError
@@ -35,7 +35,7 @@ func (ctrl *UserControllerImpl) FreezeUserHandle(c *gin.Context) {
 
 	go func() {
 		defer wg.Done()
-		apiError := ctrl.userService.ChangeUserPermissions(userID, 0) // 0 means no permission
+		apiError := ctrl.ChangeUserPermissions(userID, 0) // 0 means no permission
 		if apiError != nil {
 			//errorChannel is a channel without buffer, so it will block until the error is read
 			errorChannel <- apiError
@@ -77,7 +77,7 @@ func (ctrl *UserControllerImpl) ThawUserHandle(c *gin.Context) {
 	resultChannel := make(chan bool, 1)
 
 	go func() {
-		apiError := ctrl.userService.ProcessThawUser(userID)
+		apiError := ctrl.ProcessThawUser(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

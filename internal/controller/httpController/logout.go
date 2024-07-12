@@ -18,7 +18,7 @@ func (ctrl *UserControllerImpl) LogoutHandle(c *gin.Context) {
 	resultChannel := make(chan bool)
 
 	go func() {
-		apiError := ctrl.userService.ProcessLogoutRequest(userID)
+		apiError := ctrl.ProcessLogoutRequest(userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

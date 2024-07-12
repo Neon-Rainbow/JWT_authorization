@@ -38,7 +38,7 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 		}
 
 		// Handle the login logic using the service layer
-		loginResponse, apiError := ctrl.userService.ProcessLoginRequest(loginRequest)
+		loginResponse, apiError := ctrl.ProcessLoginRequest(loginRequest)
 		// Send the response or error to the result channel
 		resultChannel <- loginResult{
 			Response: loginResponse,
@@ -93,7 +93,7 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 		}
 
 		// Handle the login logic using the service layer
-		loginResponse, apiError := ctrl.userService.ProcessAdminLoginRequest(loginRequest)
+		loginResponse, apiError := ctrl.ProcessAdminLoginRequest(loginRequest)
 		// Send the response or error to the result channel
 		resultChannel <- loginResult{
 			Response: loginResponse,

@@ -21,9 +21,9 @@ type UserController interface {
 }
 
 type UserControllerImpl struct {
-	userService service.UserServiceImpl
+	service.UserServiceImpl
 }
 
 func NewUserController(userService service.UserServiceImpl) *UserControllerImpl {
-	return &UserControllerImpl{userService: userService}
+	return &UserControllerImpl{userService}
 }
