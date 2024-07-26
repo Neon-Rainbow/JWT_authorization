@@ -18,7 +18,7 @@ import (
 	"net"
 )
 
-func NewRouter() *gin.Engine {
+func newHTTPRouter() *gin.Engine {
 	router := gin.Default()
 
 	userDAO := dao.NewUserDAOImpl(MySQL.GetMySQL(), Redis.GetRedis())
@@ -93,5 +93,15 @@ func StartGRPCServer() {
 	log.Println(fmt.Sprintf("gRPC server is running on %v", address))
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func StartHTTPServer() {
+	r := newHTTPRouter()
+	addr := fmt.Sprintf("%v:%v", config.GetConfig().Address, config.GetConfig().Port)
+	err := r.Run(addr)
+	if err != nil {
+		log.Println("ErrorMessage starting server")
+		return
 	}
 }

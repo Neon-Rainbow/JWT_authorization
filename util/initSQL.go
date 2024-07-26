@@ -4,11 +4,11 @@ import (
 	"JWT_authorization/util/MySQL"
 	"JWT_authorization/util/Redis"
 	"context"
-	"log"
+	"errors"
 	"time"
 )
 
-func Init() {
+func Init() error {
 	// This is a placeholder for the init function
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -42,10 +42,10 @@ func Init() {
 		case <-resultChannel:
 			// Successfully initialized the database
 		case err := <-errorChannel:
-			log.Fatalf("ErrorMessage initializing the database: %v", err)
+			return err
 		case <-ctx.Done():
-			log.Fatalf("Timeout initializing the database")
+			return errors.New("timeout while initializing the database")
 		}
 	}
-	return
+	return nil
 }

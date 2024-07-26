@@ -4,8 +4,8 @@ import (
 	"JWT_authorization/config"
 	"JWT_authorization/route"
 	"JWT_authorization/util"
-	"fmt"
 	"log"
+	"sync"
 )
 
 func main() {
@@ -15,16 +15,24 @@ func main() {
 		return
 	}
 
-	util.Init()
-
-	r := route.NewRouter()
-	
-	go route.StartGRPCServer()
-
-	addr := fmt.Sprintf("%v:%v", config.GetConfig().Address, config.GetConfig().Port)
-	err = r.Run(addr)
+	err = util.Init()
 	if err != nil {
-		log.Println("ErrorMessage starting server")
+		log.Println("ErrorMessage initializing the database")
 		return
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		route.StartGRPCServer()
+	}()
+
+	go func() {
+		defer wg.Done()
+		route.StartHTTPServer()
+	}()
+
+	wg.Wait()
 }
