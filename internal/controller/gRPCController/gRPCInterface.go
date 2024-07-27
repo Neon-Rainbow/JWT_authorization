@@ -20,7 +20,7 @@ func NewJwtAuthorizationServiceServer(userService service.UserServiceImpl) *JwtA
 }
 
 func (s *JwtAuthorizationServiceServer) UserLogin(ctx context.Context, req *proto.UserLoginRequest) (*proto.UserLoginResponse, error) {
-	resp, apiError := s.UserServiceImpl.ProcessLoginRequest(model.UserLoginRequest{
+	resp, apiError := s.UserServiceImpl.ProcessLoginRequest(ctx, model.UserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -38,7 +38,7 @@ func (s *JwtAuthorizationServiceServer) UserLogin(ctx context.Context, req *prot
 }
 
 func (s *JwtAuthorizationServiceServer) AdminLogin(ctx context.Context, req *proto.AdminLoginRequest) (*proto.AdminLoginResponse, error) {
-	resp, apiError := s.UserServiceImpl.ProcessLoginRequest(model.UserLoginRequest{
+	resp, apiError := s.UserServiceImpl.ProcessLoginRequest(ctx, model.UserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
