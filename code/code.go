@@ -6,6 +6,7 @@ const (
 	Success ResponseCode = iota + 1000
 
 	RequestTimeout
+	RequestCanceled
 	ServerBusy
 
 	LoginParamsError
@@ -40,9 +41,10 @@ const (
 )
 
 var codeMsgMap = map[ResponseCode]string{
-	Success:        "success",
-	RequestTimeout: "request timeout",
-	ServerBusy:     "server busy",
+	Success:         "success",
+	RequestTimeout:  "request timeout",
+	RequestCanceled: "request canceled",
+	ServerBusy:      "server busy",
 
 	LoginParamsError:             "login params error",
 	LoginGetUserInformationError: "Get User Information error",

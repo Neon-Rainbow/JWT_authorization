@@ -18,7 +18,12 @@ func (dao *UserDAOImpl) GetUserInformationByID(userID int) (*model.User, error) 
 	return user, nil
 }
 
-func (dao *UserDAOImpl) GetUserInformationByUsername(username string) (*model.User, error) {
+func (dao *UserDAOImpl) GetUserInformationByUsername(ctx context.Context, username string) (*model.User, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
 	db := dao.DB
 	var user *model.User
 	result := db.Where("username  = ?", username).First(&user)

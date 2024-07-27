@@ -4,11 +4,29 @@ import (
 	"JWT_authorization/code"
 	"JWT_authorization/model"
 	"JWT_authorization/util/jwt"
+	"context"
 	"strconv"
 )
 
-func (s *UserServiceImpl) ProcessLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
-	dbUser, err := s.GetUserInformationByUsername(req.Username)
+func (s *UserServiceImpl) ProcessLoginRequest(ctx context.Context, req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
+	select {
+	case <-ctx.Done():
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
+			return nil, &model.ApiError{
+				Code:         code.RequestTimeout,
+				Message:      code.RequestTimeout.Message(),
+				ErrorMessage: nil,
+			}
+		}
+		return nil, &model.ApiError{
+			Code:         code.RequestCanceled,
+			Message:      code.RequestCanceled.Message(),
+			ErrorMessage: nil,
+		}
+	default:
+	}
+
+	dbUser, err := s.GetUserInformationByUsername(ctx, req.Username)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, &model.ApiError{
@@ -70,8 +88,25 @@ func (s *UserServiceImpl) ProcessLoginRequest(req model.UserLoginRequest) (*mode
 	return loginResponse, nil
 }
 
-func (s *UserServiceImpl) ProcessAdminLoginRequest(req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
-	dbUser, err := s.GetUserInformationByUsername(req.Username)
+func (s *UserServiceImpl) ProcessAdminLoginRequest(ctx context.Context, req model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError) {
+	select {
+	case <-ctx.Done():
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
+			return nil, &model.ApiError{
+				Code:         code.RequestTimeout,
+				Message:      code.RequestTimeout.Message(),
+				ErrorMessage: nil,
+			}
+		}
+		return nil, &model.ApiError{
+			Code:         code.RequestCanceled,
+			Message:      code.RequestCanceled.Message(),
+			ErrorMessage: nil,
+		}
+	default:
+	}
+
+	dbUser, err := s.GetUserInformationByUsername(ctx, req.Username)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, &model.ApiError{

@@ -17,7 +17,7 @@ type loginResult struct {
 // LoginHandler handles login requests
 func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 	// Create a context with a 5-second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	// Create a channel to receive the login result
@@ -38,7 +38,7 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 		}
 
 		// Handle the login logic using the service layer
-		loginResponse, apiError := ctrl.ProcessLoginRequest(loginRequest)
+		loginResponse, apiError := ctrl.ProcessLoginRequest(ctx, loginRequest)
 		// Send the response or error to the result channel
 		resultChannel <- loginResult{
 			Response: loginResponse,
@@ -54,6 +54,8 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 			ResponseErrorWithCode(c, code.RequestTimeout)
 			return
 		}
+		ResponseErrorWithCode(c, code.RequestCanceled)
+		return
 	case result := <-resultChannel:
 		if result.ApiError != nil {
 			ResponseErrorWithApiError(c, result.ApiError)
@@ -63,6 +65,7 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 			ResponseSuccess(c, *result.Response)
 			return
 		}
+	default:
 	}
 
 	// Default error response if no other conditions are met
@@ -72,7 +75,7 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 // AdminLoginHandle handles admin login requests
 func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 	// Create a context with a 5-second timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	// Create a channel to receive the login result
@@ -93,7 +96,7 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 		}
 
 		// Handle the login logic using the service layer
-		loginResponse, apiError := ctrl.ProcessAdminLoginRequest(loginRequest)
+		loginResponse, apiError := ctrl.ProcessAdminLoginRequest(ctx, loginRequest)
 		// Send the response or error to the result channel
 		resultChannel <- loginResult{
 			Response: loginResponse,
@@ -109,6 +112,8 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 			ResponseErrorWithCode(c, code.RequestTimeout)
 			return
 		}
+		ResponseErrorWithCode(c, code.RequestCanceled)
+		return
 	case result := <-resultChannel:
 		if result.ApiError != nil {
 			ResponseErrorWithApiError(c, result.ApiError)
@@ -118,6 +123,7 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 			ResponseSuccess(c, *result.Response)
 			return
 		}
+	default:
 	}
 
 	// Default error response if no other conditions are met
