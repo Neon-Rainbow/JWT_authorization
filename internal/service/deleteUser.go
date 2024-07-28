@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (s *UserServiceImpl) ProcessDeleteUser(userID string) *model.ApiError {
+func (s *UserServiceImpl) ProcessDeleteUser(ctx context.Context, userID string) *model.ApiError {
 
 	errorChannel := make(chan *model.ApiError, 1)
 	resultChannel := make(chan bool, 2)
@@ -16,7 +16,7 @@ func (s *UserServiceImpl) ProcessDeleteUser(userID string) *model.ApiError {
 	defer cancel()
 
 	go func() {
-		err := s.DeleteUser(userID)
+		err := s.DeleteUser(ctx, userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
 				Code:         code.DeleteUserTokenError,
@@ -29,7 +29,7 @@ func (s *UserServiceImpl) ProcessDeleteUser(userID string) *model.ApiError {
 	}()
 
 	go func() {
-		err := s.DeleteTokenFromRedis(userID)
+		err := s.DeleteTokenFromRedis(ctx, userID)
 		if err != nil {
 			errorChannel <- &model.ApiError{
 				Code:         code.DeleteUserTokenError,

@@ -9,41 +9,37 @@ import (
 	"time"
 )
 
-type loginResult struct {
-	Response *model.UserLoginResponse
-	ApiError *model.ApiError
-}
-
 // LoginHandler handles login requests
 func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 	// Create a context with a 5-second timeout
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	// Create a channel to receive the login result
-	resultChannel := make(chan loginResult)
-
 	go func() {
 		var loginRequest model.UserLoginRequest
 		// Bind the request data to the loginRequest struct
 		if err := c.ShouldBind(&loginRequest); err != nil {
 			// Send the error to the result channel
-			resultChannel <- loginResult{
-				ApiError: &model.ApiError{
-					Code:    code.LoginParamsError,
-					Message: code.LoginParamsError.Message(),
-				},
-			}
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
+				Code:         code.LoginParamsError,
+				Message:      code.LoginParamsError.Message(),
+				ErrorMessage: err,
+			})
+			cancel()
 			return
 		}
 
 		// Handle the login logic using the service layer
 		loginResponse, apiError := ctrl.ProcessLoginRequest(ctx, loginRequest)
 		// Send the response or error to the result channel
-		resultChannel <- loginResult{
-			Response: loginResponse,
-			ApiError: apiError,
+		if apiError != nil {
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
+			return
 		}
+		ctx = context.WithValue(ctx, "result", loginResponse)
+		cancel()
+		return
 	}()
 
 	// Use select to handle context timeout and completion
@@ -54,22 +50,13 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 			ResponseErrorWithCode(c, code.RequestTimeout)
 			return
 		}
-		ResponseErrorWithCode(c, code.RequestCanceled)
+		if ctx.Value("error") != nil {
+			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+			return
+		}
+		ResponseSuccess(c, ctx.Value("value").(*model.UserLoginResponse))
 		return
-	case result := <-resultChannel:
-		if result.ApiError != nil {
-			ResponseErrorWithApiError(c, result.ApiError)
-			return
-		}
-		if result.Response != nil {
-			ResponseSuccess(c, *result.Response)
-			return
-		}
-	default:
 	}
-
-	// Default error response if no other conditions are met
-	ResponseErrorWithCode(c, code.ServerBusy)
 }
 
 // AdminLoginHandle handles admin login requests
@@ -79,29 +66,32 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 	defer cancel()
 
 	// Create a channel to receive the login result
-	resultChannel := make(chan loginResult)
+	resultChannel := make(chan *model.UserLoginResponse)
 
 	go func() {
 		var loginRequest model.UserLoginRequest
 		// Bind the request data to the loginRequest struct
 		if err := c.ShouldBind(&loginRequest); err != nil {
 			// Send the error to the result channel
-			resultChannel <- loginResult{
-				ApiError: &model.ApiError{
-					Code:    code.LoginParamsError,
-					Message: code.LoginParamsError.Message(),
-				},
-			}
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
+				Code:         code.LoginParamsError,
+				Message:      code.LoginParamsError.Message(),
+				ErrorMessage: err,
+			})
+			cancel()
 			return
 		}
 
 		// Handle the login logic using the service layer
 		loginResponse, apiError := ctrl.ProcessAdminLoginRequest(ctx, loginRequest)
 		// Send the response or error to the result channel
-		resultChannel <- loginResult{
-			Response: loginResponse,
-			ApiError: apiError,
+		if apiError != nil {
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
+			return
 		}
+		resultChannel <- loginResponse
+		return
 	}()
 
 	// Use select to handle context timeout and completion
@@ -112,20 +102,13 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 			ResponseErrorWithCode(c, code.RequestTimeout)
 			return
 		}
-		ResponseErrorWithCode(c, code.RequestCanceled)
-		return
+		if ctx.Value("error") != nil {
+			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+			return
+		}
+		ResponseErrorWithCode(c, code.ServerBusy)
 	case result := <-resultChannel:
-		if result.ApiError != nil {
-			ResponseErrorWithApiError(c, result.ApiError)
-			return
-		}
-		if result.Response != nil {
-			ResponseSuccess(c, *result.Response)
-			return
-		}
-	default:
+		ResponseSuccess(c, result)
+		return
 	}
-
-	// Default error response if no other conditions are met
-	ResponseErrorWithCode(c, code.ServerBusy)
 }

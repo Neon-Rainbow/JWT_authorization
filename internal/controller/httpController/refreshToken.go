@@ -26,7 +26,7 @@ func (ctrl *UserControllerImpl) RefreshTokenHandle(c *gin.Context) {
 	resultChannel := make(chan refreshTokenResult)
 
 	go func() {
-		accessToken, err := ctrl.ProcessRefreshToken(refreshToken)
+		accessToken, err := ctrl.ProcessRefreshToken(ctx, refreshToken)
 		if err != nil {
 			resultChannel <- refreshTokenResult{
 				ApiError: err,

@@ -3,10 +3,11 @@ package service
 import (
 	"JWT_authorization/code"
 	"JWT_authorization/model"
+	"context"
 )
 
-func (s *UserServiceImpl) ProcessFreezeUser(userID string) (apiError *model.ApiError) {
-	err := s.FreezeUser(userID)
+func (s *UserServiceImpl) ProcessFreezeUser(ctx context.Context, userID string) (apiError *model.ApiError) {
+	err := s.FreezeUser(ctx, userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.FrozenUserError,
@@ -14,7 +15,7 @@ func (s *UserServiceImpl) ProcessFreezeUser(userID string) (apiError *model.ApiE
 			ErrorMessage: err,
 		}
 	}
-	err = s.DeleteTokenFromRedis(userID)
+	err = s.DeleteTokenFromRedis(ctx, userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.FrozenUserError,
@@ -27,8 +28,8 @@ func (s *UserServiceImpl) ProcessFreezeUser(userID string) (apiError *model.ApiE
 }
 
 // ProcessThawUser is a function to thaw user
-func (s *UserServiceImpl) ProcessThawUser(userID string) *model.ApiError {
-	err := s.ThawUser(userID)
+func (s *UserServiceImpl) ProcessThawUser(ctx context.Context, userID string) *model.ApiError {
+	err := s.ThawUser(ctx, userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.ThawUserError,

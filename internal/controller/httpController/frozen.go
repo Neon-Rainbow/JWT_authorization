@@ -5,6 +5,7 @@ import (
 	"JWT_authorization/model"
 	"context"
 	"github.com/gin-gonic/gin"
+	"sync"
 	"time"
 )
 
@@ -12,46 +13,57 @@ import (
 func (ctrl *UserControllerImpl) FreezeUserHandle(c *gin.Context) {
 	userID := GetUserID(c)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	errorChannel := make(chan *model.ApiError)
-	resultChannel := make(chan bool)
+	var wg sync.WaitGroup
+	wg.Add(2)
 
 	go func() {
-		apiError := ctrl.ProcessFreezeUser(userID)
+		defer wg.Done()
+		apiError := ctrl.ProcessFreezeUser(ctx, userID)
 		if apiError != nil {
-			//errorChannel is a channel without buffer, so it will block until the error is read
-			errorChannel <- apiError
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
 			return
 		}
 		return
 	}()
 
 	go func() {
-		apiError := ctrl.ChangeUserPermissions(userID, 0) // 0 means no permission
+		defer wg.Done()
+		apiError := ctrl.ChangeUserPermissions(ctx, userID, 0) // 0 means no permission
 		if apiError != nil {
-			//errorChannel is a channel without buffer, so it will block until the error is read
-			errorChannel <- apiError
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
 			return
 		}
 		return
 	}()
 
-	for i := 0; i < 2; i++ {
-		select {
-		case apiError := <-errorChannel:
-			ResponseErrorWithApiError(c, apiError)
-			return
-		case <-resultChannel:
+	go func() {
+		wg.Wait()
+		ctx = context.WithValue(ctx, "result", true)
+		cancel()
+	}()
 
-		case <-ctx.Done():
+	select {
+	case <-ctx.Done():
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
 			ResponseErrorWithCode(c, code.RequestTimeout)
 			return
 		}
+		if ctx.Value("error") != nil {
+			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+			return
+		}
+		if ctx.Value("result") != nil {
+			ResponseSuccess(c, nil)
+			return
+		}
+		ResponseErrorWithCode(c, code.ServerBusy)
+		return
 	}
-	ResponseSuccess(c, nil)
-
 }
 
 func (ctrl *UserControllerImpl) ThawUserHandle(c *gin.Context) {
@@ -61,14 +73,14 @@ func (ctrl *UserControllerImpl) ThawUserHandle(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	errorChannel := make(chan *model.ApiError, 1)
 	resultChannel := make(chan bool, 1)
 
 	go func() {
-		apiError := ctrl.ProcessThawUser(userID)
+		apiError := ctrl.ProcessThawUser(ctx, userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

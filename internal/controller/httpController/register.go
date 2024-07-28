@@ -38,7 +38,7 @@ func (ctrl *UserControllerImpl) RegisterHandle(c *gin.Context) {
 			return
 		}
 
-		registerResponse, apiError := ctrl.ProcessRegisterRequest(&registerRequest)
+		registerResponse, apiError := ctrl.ProcessRegisterRequest(ctx, &registerRequest)
 		// Send the response or error to the result channel
 		resultChannel <- registerResult{
 			Response: registerResponse,

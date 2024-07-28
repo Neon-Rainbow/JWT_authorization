@@ -8,7 +8,7 @@ import (
 )
 
 // GetUserInformationByID gets the user information from MySQL
-func (dao *UserDAOImpl) GetUserInformationByID(userID int) (*model.User, error) {
+func (dao *UserDAOImpl) GetUserInformationByID(ctx context.Context, userID int) (*model.User, error) {
 	db := dao.DB
 	var user *model.User
 	result := db.Where("id = ?", userID).First(user)
@@ -33,7 +33,7 @@ func (dao *UserDAOImpl) GetUserInformationByUsername(ctx context.Context, userna
 	return user, nil
 }
 
-func (dao *UserDAOImpl) CheckUserExists(username string, telephone string) (usernameExists bool, telephoneExists bool, err error) {
+func (dao *UserDAOImpl) CheckUserExists(ctx context.Context, username string, telephone string) (usernameExists bool, telephoneExists bool, err error) {
 	db := dao.DB
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -103,7 +103,7 @@ func (dao *UserDAOImpl) CheckUserExists(username string, telephone string) (user
 }
 
 // CreateUser creates a new user in MySQL
-func (dao *UserDAOImpl) CreateUser(username string, password string, telephone string) (*model.User, error) {
+func (dao *UserDAOImpl) CreateUser(ctx context.Context, username string, password string, telephone string) (*model.User, error) {
 	db := dao.DB
 	user := &model.User{
 		Username:  username,
@@ -121,7 +121,7 @@ func (dao *UserDAOImpl) CreateUser(username string, password string, telephone s
 
 }
 
-func (dao *UserDAOImpl) CheckUserFrozen(userID string) (bool, error) {
+func (dao *UserDAOImpl) CheckUserFrozen(ctx context.Context, userID string) (bool, error) {
 	db := dao.DB
 	var user *model.User
 	result := db.Where("id = ?", userID).First(&user)
@@ -132,7 +132,7 @@ func (dao *UserDAOImpl) CheckUserFrozen(userID string) (bool, error) {
 }
 
 // FreezeUser freezes a user in MySQL
-func (dao *UserDAOImpl) FreezeUser(userID string) error {
+func (dao *UserDAOImpl) FreezeUser(ctx context.Context, userID string) error {
 	db := dao.DB
 	result := db.Model(&model.User{}).Where("id = ?", userID).Update("is_frozen", true)
 	if result.Error != nil {
@@ -142,7 +142,7 @@ func (dao *UserDAOImpl) FreezeUser(userID string) error {
 }
 
 // ThawUser thaws a user in MySQL
-func (dao *UserDAOImpl) ThawUser(userID string) error {
+func (dao *UserDAOImpl) ThawUser(ctx context.Context, userID string) error {
 	db := dao.DB
 	result := db.Model(&model.User{}).Where("id = ?", userID).Update("is_frozen", false)
 	if result.Error != nil {
@@ -151,7 +151,7 @@ func (dao *UserDAOImpl) ThawUser(userID string) error {
 	return nil
 }
 
-func (dao *UserDAOImpl) DeleteUser(userID string) error {
+func (dao *UserDAOImpl) DeleteUser(ctx context.Context, userID string) error {
 	db := dao.DB
 	result := db.Where("id = ?", userID).Delete(&model.User{})
 	if result.Error != nil {
@@ -160,7 +160,7 @@ func (dao *UserDAOImpl) DeleteUser(userID string) error {
 	return nil
 }
 
-func (dao *UserDAOImpl) GetUserPermissions(userID string) (int, error) {
+func (dao *UserDAOImpl) GetUserPermissions(ctx context.Context, userID string) (int, error) {
 	db := dao.DB
 	var user *model.User
 	result := db.Where("id = ?", userID).First(&user)
@@ -173,7 +173,7 @@ func (dao *UserDAOImpl) GetUserPermissions(userID string) (int, error) {
 // ChangeUserPermissions changes the permissions of a user in MySQL
 // @param userID: the ID of the user
 // @param newPermissions: the new permissions of the user, represented as an integer, with each bit representing a permission
-func (dao *UserDAOImpl) ChangeUserPermissions(userID string, newPermissions int) error {
+func (dao *UserDAOImpl) ChangeUserPermissions(ctx context.Context, userID string, newPermissions int) error {
 	db := dao.DB
 	result := db.Model(&model.User{}).Where("id = ?", userID).Update("permission", newPermissions)
 	if result.Error != nil {

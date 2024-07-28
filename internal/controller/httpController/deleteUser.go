@@ -11,35 +11,40 @@ import (
 func (ctrl *UserControllerImpl) DeleteUserHandle(c *gin.Context) {
 	userID := GetUserID(c)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	errorChannel := make(chan *model.ApiError, 1)
-	resultChannel := make(chan bool, 1)
-
 	go func() {
-		apiError := ctrl.ProcessDeleteUser(userID)
+		apiError := ctrl.ProcessDeleteUser(ctx, userID)
 		if apiError != nil {
-			errorChannel <- apiError
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
 			return
 		}
-		resultChannel <- true
+		ctx = context.WithValue(ctx, "result", true)
+		cancel()
+		return
 	}()
 
 	select {
-	case apiError := <-errorChannel:
-		ResponseErrorWithApiError(c, apiError)
-		return
-	case <-resultChannel:
-		ResponseSuccess(c, nil)
-		return
 	case <-ctx.Done():
-		ResponseErrorWithCode(c, code.RequestTimeout)
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
+			ResponseErrorWithCode(c, code.ServerBusy)
+			return
+		}
+		if ctx.Err().Error() == context.Canceled.Error() {
+			if ctx.Value("error") != nil {
+				ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+				return
+			}
+			if ctx.Value("result") != nil {
+				ResponseSuccess(c, nil)
+				return
+			}
+			ResponseErrorWithCode(c, code.ServerBusy)
+			return
+		}
+		ResponseErrorWithCode(c, code.ServerBusy)
 		return
-	default:
-
 	}
-	ResponseErrorWithCode(c, code.ServerBusy)
-	return
-
 }

@@ -11,31 +11,36 @@ import (
 // LogoutHandle handles logout requests
 func (ctrl *UserControllerImpl) LogoutHandle(c *gin.Context) {
 	userID := GetUserID(c)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	errorChannel := make(chan *model.ApiError)
-	resultChannel := make(chan bool)
-
 	go func() {
-		apiError := ctrl.ProcessLogoutRequest(userID)
+		apiError := ctrl.ProcessLogoutRequest(ctx, userID)
 		if apiError != nil {
-			errorChannel <- apiError
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
 			return
 		}
-		resultChannel <- true
+		ctx = context.WithValue(ctx, "result", "Logout successful")
+		cancel()
 		return
 	}()
 
 	select {
 	case <-ctx.Done():
-		ResponseErrorWithCode(c, code.RequestTimeout)
-		return
-	case err := <-errorChannel:
-		ResponseErrorWithApiError(c, err)
-		return
-	case <-resultChannel:
-		ResponseSuccess(c, nil)
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
+			ResponseErrorWithCode(c, code.RequestTimeout)
+			return
+		}
+		if ctx.Value("error") != nil {
+			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+			return
+		}
+		if ctx.Value("result") != nil {
+			ResponseSuccess(c, nil)
+			return
+		}
+		ResponseErrorWithCode(c, code.ServerBusy)
 		return
 	}
 }

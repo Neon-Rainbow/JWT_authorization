@@ -13,11 +13,8 @@ import (
 
 func (ctrl *UserControllerImpl) CheckUserPermissionsHandle(c *gin.Context) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
-
-	errorChannel := make(chan *model.ApiError)
-	resultChannel := make(chan bool)
 
 	go func() {
 		inputPermission := c.Query("permission_number")
@@ -25,43 +22,48 @@ func (ctrl *UserControllerImpl) CheckUserPermissionsHandle(c *gin.Context) {
 
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {
-			errorChannel <- &model.ApiError{
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
 				Code:         code.PermissionParamsError,
 				Message:      code.PermissionParamsError.Message(),
 				ErrorMessage: err,
-			}
+			})
+			cancel()
 			return
 		}
 
-		isAllowed, apiError := ctrl.CheckPermission(userID, permissionNumber)
+		isAllowed, apiError := ctrl.CheckPermission(ctx, userID, permissionNumber)
 		if apiError != nil {
-			errorChannel <- apiError
+			ctx = context.WithValue(ctx, "error", apiError)
+			cancel()
 			return
 		}
-
-		resultChannel <- isAllowed
+		ctx = context.WithValue(ctx, "result", isAllowed)
+		cancel()
+		return
 	}()
 
 	select {
 	case <-ctx.Done():
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
 			ResponseErrorWithCode(c, code.RequestTimeout)
 			return
 		}
+		if ctx.Value("error") != nil {
+			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+			return
+		}
+		if ctx.Value("result") != nil {
+			ResponseSuccess(c, ctx.Value("result"))
+			return
+		}
 		ResponseErrorWithCode(c, code.ServerBusy)
-		return
-	case apiError := <-errorChannel:
-		ResponseErrorWithApiError(c, apiError)
-		return
-	case isAllowed := <-resultChannel:
-		ResponseSuccess(c, isAllowed)
 		return
 	}
 }
 
 func (ctrl *UserControllerImpl) GetUserPermissionHandle(c *gin.Context) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	errorChannel := make(chan *model.ApiError)
@@ -70,7 +72,7 @@ func (ctrl *UserControllerImpl) GetUserPermissionHandle(c *gin.Context) {
 	go func() {
 		userID := GetUserID(c)
 
-		userPermissions, apiError := ctrl.GetUserPermissions(userID)
+		userPermissions, apiError := ctrl.GetUserPermissions(ctx, userID)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -104,7 +106,7 @@ func (ctrl *UserControllerImpl) GetUserPermissionHandle(c *gin.Context) {
 }
 
 func (ctrl *UserControllerImpl) AddUserPermissionHandle(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	errorChannel := make(chan *model.ApiError)
@@ -124,7 +126,7 @@ func (ctrl *UserControllerImpl) AddUserPermissionHandle(c *gin.Context) {
 			return
 		}
 
-		apiError := ctrl.AddPermission(userID, permissionNumber)
+		apiError := ctrl.AddPermission(ctx, userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return
@@ -151,7 +153,7 @@ func (ctrl *UserControllerImpl) AddUserPermissionHandle(c *gin.Context) {
 }
 
 func (ctrl *UserControllerImpl) DeleteUserPermissionHandle(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	errorChannel := make(chan *model.ApiError)
@@ -171,7 +173,7 @@ func (ctrl *UserControllerImpl) DeleteUserPermissionHandle(c *gin.Context) {
 			return
 		}
 
-		apiError := ctrl.DeletePermission(userID, permissionNumber)
+		apiError := ctrl.DeletePermission(ctx, userID, permissionNumber)
 		if apiError != nil {
 			errorChannel <- apiError
 			return

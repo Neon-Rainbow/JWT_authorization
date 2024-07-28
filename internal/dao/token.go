@@ -8,9 +8,8 @@ import (
 var ctx = context.Background()
 
 // SetTokenToRedis is a function to set token to redis
-func (dao *UserDAOImpl) SetTokenToRedis(userID string, refreshToken string) error {
+func (dao *UserDAOImpl) SetTokenToRedis(ctx context.Context, userID string, refreshToken string) error {
 	rdb := dao.Client
-	ctx := dao.Context
 	err := rdb.Set(ctx, userID, refreshToken, time.Hour*24*15).Err()
 	if err != nil {
 		return err
@@ -19,9 +18,8 @@ func (dao *UserDAOImpl) SetTokenToRedis(userID string, refreshToken string) erro
 }
 
 // GetTokenFromRedis is a function to get token from redis
-func (dao *UserDAOImpl) GetTokenFromRedis(userID string) (refreshToken string, err error) {
+func (dao *UserDAOImpl) GetTokenFromRedis(ctx context.Context, userID string) (refreshToken string, err error) {
 	rdb := dao.Client
-	ctx := dao.Context
 	refreshToken, err = rdb.Get(ctx, userID).Result()
 	if err != nil {
 		return "", err
@@ -30,9 +28,8 @@ func (dao *UserDAOImpl) GetTokenFromRedis(userID string) (refreshToken string, e
 }
 
 // DeleteTokenFromRedis is a function to delete token from redis
-func (dao *UserDAOImpl) DeleteTokenFromRedis(userID string) error {
+func (dao *UserDAOImpl) DeleteTokenFromRedis(ctx context.Context, userID string) error {
 	rdb := dao.Client
-	ctx := dao.Context
 	err := rdb.Del(ctx, userID).Err()
 	if err != nil {
 		return err

@@ -3,12 +3,13 @@ package service
 import (
 	"JWT_authorization/code"
 	"JWT_authorization/model"
+	"context"
 )
 
 // CheckPermission checks if a user has a specific permission
 // used to check if the user has the permission of the permissionNumber
-func (s *UserServiceImpl) CheckPermission(userID string, permissionNumber int) (isAllowed bool, apiError *model.ApiError) {
-	userPermissions, err := s.GetUserPermissions(userID)
+func (s *UserServiceImpl) CheckPermission(ctx context.Context, userID string, permissionNumber int) (isAllowed bool, apiError *model.ApiError) {
+	userPermissions, err := s.GetUserPermissions(ctx, userID)
 	if err != nil {
 		return false, &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -21,8 +22,8 @@ func (s *UserServiceImpl) CheckPermission(userID string, permissionNumber int) (
 
 // AddPermission adds a permission to a user
 // used to add the permission of the permissionNumber to the user
-func (s *UserServiceImpl) AddPermission(userID string, permissionNumber int) *model.ApiError {
-	userPermissions, err := s.GetUserPermissions(userID)
+func (s *UserServiceImpl) AddPermission(ctx context.Context, userID string, permissionNumber int) *model.ApiError {
+	userPermissions, err := s.GetUserPermissions(ctx, userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -33,7 +34,7 @@ func (s *UserServiceImpl) AddPermission(userID string, permissionNumber int) *mo
 
 	newPermissions := userPermissions | (1 << (permissionNumber - 1))
 
-	err = s.ChangeUserPermissions(userID, newPermissions)
+	err = s.ChangeUserPermissions(ctx, userID, newPermissions)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionChangeError,
@@ -46,8 +47,8 @@ func (s *UserServiceImpl) AddPermission(userID string, permissionNumber int) *mo
 
 // DeletePermission deletes a permission from a user
 // used to delete the permission of the permissionNumber from the user
-func (s *UserServiceImpl) DeletePermission(userID string, permissionNumber int) *model.ApiError {
-	userPermissions, err := s.GetUserPermissions(userID)
+func (s *UserServiceImpl) DeletePermission(ctx context.Context, userID string, permissionNumber int) *model.ApiError {
+	userPermissions, err := s.UserDAOImpl.GetUserPermissions(ctx, userID)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -58,7 +59,7 @@ func (s *UserServiceImpl) DeletePermission(userID string, permissionNumber int) 
 
 	newPermissions := userPermissions &^ (1 << (permissionNumber - 1))
 
-	err = s.ChangeUserPermissions(userID, newPermissions)
+	err = s.ChangeUserPermissions(ctx, userID, newPermissions)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionChangeError,
@@ -71,8 +72,8 @@ func (s *UserServiceImpl) DeletePermission(userID string, permissionNumber int) 
 
 // GetUserPermissions gets the permissions of a user
 // used to get the permissions of the user
-func (s *UserServiceImpl) GetUserPermissions(userID string) (int, *model.ApiError) {
-	userPermissions, err := s.GetUserPermissions(userID)
+func (s *UserServiceImpl) GetUserPermissions(ctx context.Context, userID string) (int, *model.ApiError) {
+	userPermissions, err := s.UserDAOImpl.GetUserPermissions(ctx, userID)
 	if err != nil {
 		return 0, &model.ApiError{
 			Code:         code.PermissionGetError,
@@ -83,8 +84,8 @@ func (s *UserServiceImpl) GetUserPermissions(userID string) (int, *model.ApiErro
 	return userPermissions, nil
 }
 
-func (s *UserServiceImpl) ChangeUserPermissions(userID string, permission int) *model.ApiError {
-	err := s.ChangeUserPermissions(userID, permission)
+func (s *UserServiceImpl) ChangeUserPermissions(ctx context.Context, userID string, permission int) *model.ApiError {
+	err := s.UserDAOImpl.ChangeUserPermissions(ctx, userID, permission)
 	if err != nil {
 		return &model.ApiError{
 			Code:         code.PermissionChangeError,
