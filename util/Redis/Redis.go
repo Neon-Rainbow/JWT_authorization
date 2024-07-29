@@ -8,7 +8,6 @@ import (
 )
 
 var rdb *redis.Client
-var ctx = context.Background()
 
 func InitRedis() error {
 	cfg := config.GetConfig()
@@ -21,7 +20,7 @@ func InitRedis() error {
 	})
 
 	// Test the connection
-	_, err := rdb.Ping(ctx).Result()
+	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {
 		return err
 	}

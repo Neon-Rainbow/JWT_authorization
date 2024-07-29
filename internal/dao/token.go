@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-var ctx = context.Background()
-
 // SetTokenToRedis is a function to set token to redis
 func (dao *UserDAOImpl) SetTokenToRedis(ctx context.Context, userID string, refreshToken string) error {
 	rdb := dao.Client

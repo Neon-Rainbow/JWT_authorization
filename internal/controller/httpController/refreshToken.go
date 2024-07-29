@@ -56,10 +56,6 @@ func (ctrl *UserControllerImpl) RefreshTokenHandle(c *gin.Context) {
 	case <-ctx.Done():
 		ResponseErrorWithCode(c, code.RequestTimeout)
 		return
-	default:
-
 	}
-	ResponseErrorWithCode(c, code.ServerBusy)
-	return
 
 }

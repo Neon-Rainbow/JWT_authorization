@@ -5,6 +5,7 @@ import (
 	"JWT_authorization/model"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -42,9 +43,9 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 		return
 	}()
 
-	// Use select to handle context timeout and completion
 	select {
 	case <-ctx.Done():
+		fmt.Println(ctx)
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			// Send a timeout error response if the context times out
 			ResponseErrorWithCode(c, code.RequestTimeout)
@@ -54,7 +55,11 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
 			return
 		}
-		ResponseSuccess(c, ctx.Value("value").(*model.UserLoginResponse))
+		if ctx.Value("result") != nil {
+			ResponseSuccess(c, ctx.Value("result").(*model.UserLoginResponse))
+			return
+		}
+		ResponseErrorWithCode(c, code.ServerBusy)
 		return
 	}
 }
@@ -64,9 +69,6 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 	// Create a context with a 5-second timeout
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
-
-	// Create a channel to receive the login result
-	resultChannel := make(chan *model.UserLoginResponse)
 
 	go func() {
 		var loginRequest model.UserLoginRequest
@@ -90,7 +92,8 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 			cancel()
 			return
 		}
-		resultChannel <- loginResponse
+		ctx = context.WithValue(ctx, "result", loginResponse)
+		cancel()
 		return
 	}()
 
@@ -106,9 +109,10 @@ func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
 			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
 			return
 		}
+		if ctx.Value("result") != nil {
+			ResponseSuccess(c, ctx.Value("result").(*model.UserLoginResponse))
+			return
+		}
 		ResponseErrorWithCode(c, code.ServerBusy)
-	case result := <-resultChannel:
-		ResponseSuccess(c, result)
-		return
 	}
 }
