@@ -18,7 +18,15 @@ func (ctrl *UserControllerImpl) CheckUserPermissionsHandle(c *gin.Context) {
 
 	go func() {
 		inputPermission := c.Query("permission_number")
-		userID := GetUserID(c)
+		userID, exists := GetUserID(c)
+		if !exists {
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
+				Code:    code.RequestUnauthorized,
+				Message: code.RequestUnauthorized.Message(),
+			})
+			cancel()
+			return
+		}
 
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {
@@ -67,7 +75,15 @@ func (ctrl *UserControllerImpl) GetUserPermissionHandle(c *gin.Context) {
 	defer cancel()
 
 	go func() {
-		userID := GetUserID(c)
+		userID, exists := GetUserID(c)
+		if !exists {
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
+				Code:    code.RequestUnauthorized,
+				Message: code.RequestUnauthorized.Message(),
+			})
+			cancel()
+			return
+		}
 
 		userPermissions, apiError := ctrl.GetUserPermissions(ctx, userID)
 		if apiError != nil {
@@ -111,7 +127,15 @@ func (ctrl *UserControllerImpl) AddUserPermissionHandle(c *gin.Context) {
 
 	go func() {
 		inputPermission := c.Query("permission_number")
-		userID := GetUserID(c)
+		userID, exists := GetUserID(c)
+		if !exists {
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
+				Code:    code.RequestUnauthorized,
+				Message: code.RequestUnauthorized.Message(),
+			})
+			cancel()
+			return
+		}
 
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {
@@ -163,7 +187,15 @@ func (ctrl *UserControllerImpl) DeleteUserPermissionHandle(c *gin.Context) {
 
 	go func() {
 		inputPermission := c.Query("permission_number")
-		userID := GetUserID(c)
+		userID, exists := GetUserID(c)
+		if !exists {
+			ctx = context.WithValue(ctx, "error", &model.ApiError{
+				Code:    code.RequestUnauthorized,
+				Message: code.RequestUnauthorized.Message(),
+			})
+			cancel()
+			return
+		}
 
 		permissionNumber, err := strconv.Atoi(inputPermission)
 		if err != nil {

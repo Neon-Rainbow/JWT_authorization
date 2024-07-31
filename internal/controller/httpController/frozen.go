@@ -11,7 +11,11 @@ import (
 
 // FreezeUserHandle is a function to frozen user
 func (ctrl *UserControllerImpl) FreezeUserHandle(c *gin.Context) {
-	userID := GetUserID(c)
+	userID, exists := GetUserID(c)
+	if !exists {
+		ResponseErrorWithMessage(c, code.RequestUnauthorized, "User ID is required")
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -67,7 +71,10 @@ func (ctrl *UserControllerImpl) FreezeUserHandle(c *gin.Context) {
 }
 
 func (ctrl *UserControllerImpl) ThawUserHandle(c *gin.Context) {
-	userID := GetUserID(c)
+	userID, exists := GetUserID(c)
+	if !exists {
+		ResponseErrorWithMessage(c, code.RequestUnauthorized, "User ID is required")
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()

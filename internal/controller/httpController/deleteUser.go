@@ -9,7 +9,11 @@ import (
 )
 
 func (ctrl *UserControllerImpl) DeleteUserHandle(c *gin.Context) {
-	userID := GetUserID(c)
+	userID, exists := GetUserID(c)
+	if !exists {
+		ResponseErrorWithMessage(c, code.RequestUnauthorized, "User ID is required")
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
