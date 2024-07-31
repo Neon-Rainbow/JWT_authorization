@@ -12,5 +12,5 @@ type ApiError struct {
 }
 
 func (e *ApiError) Error() string {
-	return fmt.Sprintf("Code: %v, Message: %v, ErrorMessage: %v", e.Code, e.Message, e.ErrorMessage)
+	return fmt.Sprintf("ApiError Detail | Code: %v | Message: %v | ErrorMessage: %v", e.Code, e.Message, e.ErrorMessage)
 }
