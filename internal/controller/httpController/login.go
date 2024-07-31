@@ -16,7 +16,7 @@ func (ctrl *UserControllerImpl) handleLoginRequest(c *gin.Context, processLogin 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resultChan := make(chan interface{}, 1)
+	resultChan := make(chan interface{})
 
 	go func() {
 		defer close(resultChan) // Ensure the channel is closed when goroutine exits
@@ -50,14 +50,18 @@ func (ctrl *UserControllerImpl) handleLoginRequest(c *gin.Context, processLogin 
 			return
 		}
 		ResponseErrorWithCode(c, code.ServerBusy)
+		return
 	case result := <-resultChan:
 		switch res := result.(type) {
 		case *model.ApiError:
 			ResponseErrorWithApiError(c, res)
+			return
 		case *model.UserLoginResponse:
 			ResponseSuccess(c, res)
+			return
 		default:
 			ResponseErrorWithCode(c, code.ServerBusy)
+			return
 		}
 	}
 }
