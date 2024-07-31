@@ -5,120 +5,69 @@ import (
 	"JWT_authorization/model"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"time"
 )
 
-// LoginHandler handles login requests
-func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
+// handleLoginRequest handles both user and admin login requests
+func (ctrl *UserControllerImpl) handleLoginRequest(c *gin.Context, processLogin func(context.Context, model.UserLoginRequest) (*model.UserLoginResponse, *model.ApiError)) {
 	// Create a context with a 5-second timeout
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
+	resultChan := make(chan interface{}, 1)
+
 	go func() {
+		defer close(resultChan) // Ensure the channel is closed when goroutine exits
 		var loginRequest model.UserLoginRequest
-		// Bind the request data to the loginRequest struct
 		if err := c.ShouldBind(&loginRequest); err != nil {
-			// Send the error to the result channel
 			apiError := &model.ApiError{
 				Code:         code.LoginParamsError,
 				Message:      code.LoginParamsError.Message(),
 				ErrorMessage: err,
 			}
-			ctx = context.WithValue(ctx, "error", apiError)
-			zap.L().Error("LoginHandler:请求参数错误", zap.Error(apiError))
-
-			cancel()
+			zap.L().Error("handleLoginRequest: 请求参数错误", zap.Error(apiError))
+			resultChan <- apiError
 			return
 		}
 
-		// Handle the login logic using the service layer
-		loginResponse, apiError := ctrl.ProcessLoginRequest(ctx, loginRequest)
-		// Send the response or error to the result channel
+		loginResponse, apiError := processLogin(ctx, loginRequest)
 		if apiError != nil {
-			ctx = context.WithValue(ctx, "error", apiError)
-			zap.L().Error("LoginHandler:登录失败", zap.Error(apiError))
-			cancel()
+			zap.L().Error("handleLoginRequest: 登录失败", zap.Error(apiError))
+			resultChan <- apiError
 			return
 		}
-		ctx = context.WithValue(ctx, "result", loginResponse)
-		cancel()
-		return
+
+		resultChan <- loginResponse
 	}()
 
 	select {
 	case <-ctx.Done():
-		fmt.Println(ctx)
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			// Send a timeout error response if the context times out
 			ResponseErrorWithCode(c, code.RequestTimeout)
-			zap.L().Error("LoginHandler:请求超时", zap.Error(ctx.Err()))
-			return
-		}
-		if ctx.Value("error") != nil {
-			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
-			return
-		}
-		if ctx.Value("result") != nil {
-			ResponseSuccess(c, ctx.Value("result").(*model.UserLoginResponse))
+			zap.L().Error("handleLoginRequest: 请求超时", zap.Error(ctx.Err()))
 			return
 		}
 		ResponseErrorWithCode(c, code.ServerBusy)
-		return
+	case result := <-resultChan:
+		switch res := result.(type) {
+		case *model.ApiError:
+			ResponseErrorWithApiError(c, res)
+		case *model.UserLoginResponse:
+			ResponseSuccess(c, res)
+		default:
+			ResponseErrorWithCode(c, code.ServerBusy)
+		}
 	}
+}
+
+// LoginHandler handles login requests
+func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
+	ctrl.handleLoginRequest(c, ctrl.ProcessLoginRequest)
 }
 
 // AdminLoginHandle handles admin login requests
 func (ctrl *UserControllerImpl) AdminLoginHandle(c *gin.Context) {
-	// Create a context with a 5-second timeout
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
-	defer cancel()
-
-	go func() {
-		var loginRequest model.UserLoginRequest
-		// Bind the request data to the loginRequest struct
-		if err := c.ShouldBind(&loginRequest); err != nil {
-			// Send the error to the result channel
-			ctx = context.WithValue(ctx, "error", &model.ApiError{
-				Code:         code.LoginParamsError,
-				Message:      code.LoginParamsError.Message(),
-				ErrorMessage: err,
-			})
-			cancel()
-			return
-		}
-
-		// Handle the login logic using the service layer
-		loginResponse, apiError := ctrl.ProcessAdminLoginRequest(ctx, loginRequest)
-		// Send the response or error to the result channel
-		if apiError != nil {
-			ctx = context.WithValue(ctx, "error", apiError)
-			cancel()
-			return
-		}
-		ctx = context.WithValue(ctx, "result", loginResponse)
-		cancel()
-		return
-	}()
-
-	// Use select to handle context timeout and completion
-	select {
-	case <-ctx.Done():
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			// Send a timeout error response if the context times out
-			ResponseErrorWithCode(c, code.RequestTimeout)
-			return
-		}
-		if ctx.Value("error") != nil {
-			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
-			return
-		}
-		if ctx.Value("result") != nil {
-			ResponseSuccess(c, ctx.Value("result").(*model.UserLoginResponse))
-			return
-		}
-		ResponseErrorWithCode(c, code.ServerBusy)
-	}
+	ctrl.handleLoginRequest(c, ctrl.ProcessAdminLoginRequest)
 }
