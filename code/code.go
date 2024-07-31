@@ -81,6 +81,14 @@ func (code ResponseCode) Message() string {
 	return codeMsgMap[code]
 }
 
+func (code ResponseCode) Error() string {
+	return codeMsgMap[code]
+}
+
+func (code ResponseCode) Int() int {
+	return int(code)
+}
+
 const (
 	Permission1 = 1 << iota
 	Permission2
