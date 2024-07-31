@@ -10,8 +10,10 @@ import (
 	"JWT_authorization/proto"
 	"JWT_authorization/util/MySQL"
 	"JWT_authorization/util/Redis"
+	"JWT_authorization/util/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"
@@ -19,7 +21,10 @@ import (
 )
 
 func newHTTPRouter() *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+
+	router.Use(logger.GinLogger(zap.L()))
+	router.Use(logger.GinRecovery(zap.L(), true))
 
 	userDAO := dao.NewUserDAOImpl(MySQL.GetMySQL(), Redis.GetRedis())
 	userService := service.NewUserService(*userDAO)
