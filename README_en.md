@@ -1,6 +1,6 @@
 # JWT Authorization
 
-[简体中文](./README)
+[简体中文](./README.md)
 
 A demo project for user authentication and authorization control using JWT, MySQL, Redis and gRPC technology stack.
 The project provides HTTP API and gRPC API
