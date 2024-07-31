@@ -8,11 +8,6 @@ import (
 	"time"
 )
 
-type refreshTokenResult struct {
-	Response *model.RefreshTokenResponse
-	ApiError *model.ApiError
-}
-
 func (ctrl *UserControllerImpl) RefreshTokenHandle(c *gin.Context) {
 	refreshToken := c.Query("refresh_token")
 	if refreshToken == "" {
@@ -23,39 +18,40 @@ func (ctrl *UserControllerImpl) RefreshTokenHandle(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	resultChannel := make(chan refreshTokenResult)
-
 	go func() {
 		accessToken, err := ctrl.ProcessRefreshToken(ctx, refreshToken)
 		if err != nil {
-			resultChannel <- refreshTokenResult{
-				ApiError: err,
-				Response: nil,
-			}
+			ctx = context.WithValue(ctx, "error", err)
+			cancel()
 			return
 		}
-		resultChannel <- refreshTokenResult{
-			ApiError: nil,
-			Response: &model.RefreshTokenResponse{
-				AccessToken:  accessToken,
-				RefreshToken: refreshToken,
-			},
-		}
+		ctx = context.WithValue(ctx, "is_success", true)
+		ctx = context.WithValue(ctx, "access_token", accessToken)
+		ctx = context.WithValue(ctx, "refresh_token", refreshToken)
+		cancel()
+		return
 	}()
 
 	select {
-	case result := <-resultChannel:
-		if result.ApiError != nil {
-			ResponseErrorWithApiError(c, result.ApiError)
-			return
-		}
-		if result.Response != nil {
-			ResponseSuccess(c, result.Response)
-			return
-		}
 	case <-ctx.Done():
-		ResponseErrorWithCode(c, code.RequestTimeout)
+		if ctx.Err().Error() == context.DeadlineExceeded.Error() {
+			ResponseErrorWithMessage(c, code.RequestTimeout, "Request Timeout")
+			return
+		}
+		if ctx.Value("error") != nil {
+			ResponseErrorWithApiError(c, ctx.Value("error").(*model.ApiError))
+			return
+		}
+		if ctx.Value("is_success").(bool) {
+			accessToken := ctx.Value("access_token").(string)
+			refreshToken := ctx.Value("refresh_token").(string)
+			ResponseSuccess(c, gin.H{
+				"access_token":  accessToken,
+				"refresh_token": refreshToken,
+			})
+			return
+		}
+		ResponseErrorWithCode(c, code.ServerBusy)
 		return
 	}
-
 }
