@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -21,11 +22,14 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 		// Bind the request data to the loginRequest struct
 		if err := c.ShouldBind(&loginRequest); err != nil {
 			// Send the error to the result channel
-			ctx = context.WithValue(ctx, "error", &model.ApiError{
+			apiError := &model.ApiError{
 				Code:         code.LoginParamsError,
 				Message:      code.LoginParamsError.Message(),
 				ErrorMessage: err,
-			})
+			}
+			ctx = context.WithValue(ctx, "error", apiError)
+			zap.L().Error("LoginHandler:请求参数错误", zap.Error(apiError))
+
 			cancel()
 			return
 		}
@@ -35,6 +39,7 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 		// Send the response or error to the result channel
 		if apiError != nil {
 			ctx = context.WithValue(ctx, "error", apiError)
+			zap.L().Error("LoginHandler:登录失败", zap.Error(apiError))
 			cancel()
 			return
 		}
@@ -49,6 +54,7 @@ func (ctrl *UserControllerImpl) LoginHandler(c *gin.Context) {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			// Send a timeout error response if the context times out
 			ResponseErrorWithCode(c, code.RequestTimeout)
+			zap.L().Error("LoginHandler:请求超时", zap.Error(ctx.Err()))
 			return
 		}
 		if ctx.Value("error") != nil {
